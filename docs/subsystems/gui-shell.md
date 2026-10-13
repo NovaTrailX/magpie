@@ -51,6 +51,15 @@ three.
 上覆盖五种语言、隐藏说明的可访问描述、组合控件、悬停、Tab、Escape、输入框对齐、窄窗口和
 浮层清理。Playwright 使用已有安装，参见[浏览器测试说明](../../internal/gui/tests/README.md)。
 
+### Windows 软件渲染
+
+Windows 桌面版遇到 WebView2 图形合成闪烁时，可设置 `MAGPIE_DISABLE_GPU=1`
+并完全退出、重新启动 magpie。`windowsOptions` 将 `--disable-gpu` 传给 WebView2；
+未设置或设为 `0` 时保留默认硬件加速。此设置只影响 magpie 的 Windows 界面。
+当前 Wails 的加载器会清空标准 `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS`，并阻止
+注册表参数覆盖，因此直接设置这两种 WebView2 参数不会生效。
+`TestWindowsSoftwareRendering` 覆盖默认、关闭和启用这三种取值。
+
 ### Streamed output speed
 
 Usage rows and aggregates use `Record.Decode` and `DecodeOf` in

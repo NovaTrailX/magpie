@@ -5,10 +5,24 @@ package gui
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 
 	"github.com/yetone/magpie/internal/appdir"
 )
+
+// 仅明确启用的软件渲染开关改变 Windows 启动参数，默认不影响硬件加速。
+func TestWindowsSoftwareRendering(t *testing.T) {
+	for _, value := range []string{"", "0", "1"} {
+		t.Run("value="+value, func(t *testing.T) {
+			t.Setenv("MAGPIE_DISABLE_GPU", value)
+			got := windowsOptions().AdditionalBrowserArgs
+			if slices.Contains(got, "--disable-gpu") != (value == "1") {
+				t.Fatalf("MAGPIE_DISABLE_GPU=%q: browser args %v", value, got)
+			}
+		})
+	}
+}
 
 // #508: a portable magpie on Windows still made %APPDATA%\magpie.exe,
 // WebView2's profile at Wails' default. Portable, the app's options put it

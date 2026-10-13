@@ -272,10 +272,15 @@ func (h *host) zoomWindows() {
 // a folder a portable magpie must not leave behind (#508). Installed, it
 // stays there, so what the pages kept isn't lost.
 func windowsOptions() application.WindowsOptions {
-	return application.WindowsOptions{
+	o := application.WindowsOptions{
 		DisableQuitOnLastWindowClosed: true,
 		WebviewUserDataPath:           appdir.WebView(),
 	}
+	// Wails 会清空 WebView2 的环境变量与注册表覆盖，需将本机开关直接传给浏览器。
+	if os.Getenv("MAGPIE_DISABLE_GPU") == "1" {
+		o.AdditionalBrowserArgs = []string{"--disable-gpu"}
+	}
+	return o
 }
 
 // panelStart is the panel's height before its page first asks for one.
