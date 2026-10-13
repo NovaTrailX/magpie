@@ -44,9 +44,11 @@ three.
 用量上下文和回复设置也使用它。格式示例留在占位符中，说明保留默认值、限制和
 操作规则。状态、错误和即时后果仍常驻显示，例如供应商关闭状态、同步目的地
 切换提示和 OAuth 回调地址，不通过 `field` 的 `hint` 参数传入。
+供应商的并发、每分钟请求数、排队和价格倍率字段沿用表单的统一输入宽度，
+帮助按钮排列在输入框右侧；宽屏和窄屏下都不再对部分数值字段单独限宽。
 
 `node --test internal/gui/tests/field-help.test.cjs` 在 Chromium 和 WebKit
-上覆盖五种语言、隐藏说明的可访问描述、组合控件、悬停、Tab、Escape、窄窗口和
+上覆盖五种语言、隐藏说明的可访问描述、组合控件、悬停、Tab、Escape、输入框对齐、窄窗口和
 浮层清理。Playwright 使用已有安装，参见[浏览器测试说明](../../internal/gui/tests/README.md)。
 
 ### Streamed output speed

@@ -58,6 +58,8 @@ for (const engine of process.env.BROWSER ? [process.env.BROWSER] : ["chromium", 
         assert.equal(await box.count(), 1, selector);
         assert.equal(await box.locator("xpath=ancestor::*[contains(@class,'has-help')][1]").locator(".help-mark").count(), 1, selector);
       }
+      const widths = await page.locator(".editor input.concurrency, .editor input.rpm, .editor input.queue-limit, .editor input.queue-wait, .editor input.price-rate").evaluateAll((boxes) => boxes.map((box) => box.getBoundingClientRect().width));
+      assert(Math.max(...widths) - Math.min(...widths) < 1, "numeric provider fields have the same width");
       // 点击标签仍聚焦原控件；真实 Tab 顺序可到达说明标记。
       const id = await input.getAttribute("id");
       await page.locator(`label[for="${id}"]`).click();
@@ -85,6 +87,8 @@ for (const engine of process.env.BROWSER ? [process.env.BROWSER] : ["chromium", 
 
       // 窄窗口、长说明与底部锚点都由浮层定位器约束。
       await page.setViewportSize({ width: 360, height: 480 });
+      const narrowWidths = await page.locator(".editor input.concurrency, .editor input.rpm, .editor input.queue-limit, .editor input.queue-wait, .editor input.price-rate").evaluateAll((boxes) => boxes.map((box) => box.getBoundingClientRect().width));
+      assert(Math.max(...narrowWidths) - Math.min(...narrowWidths) < 1, "numeric fields also align in a narrow window");
       await marker.scrollIntoViewIfNeeded();
       await marker.hover();
       await pop.waitFor();
