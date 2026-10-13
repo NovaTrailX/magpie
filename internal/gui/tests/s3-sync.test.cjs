@@ -8,6 +8,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { reach } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 
@@ -113,6 +114,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await box(L.endpoint).fill("https://acct.r2.cloudflarestorage.com");
       await box(L.phrase).fill("correct horse");
       const save = form.locator(".bar .primary");
+      await reach(page, save);
       await save.click();
       assert.equal(await form.locator(".editor-error").textContent(), zh ? "请填写存储桶名称" : "Name the bucket");
       assert.equal(posts.length, 0);

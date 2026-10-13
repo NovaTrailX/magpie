@@ -85,12 +85,18 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         await tabs.filter({ hasText: "System One" }).click();
         assert.equal(await modelCode(), "cf/@cf/typesafe/jev", "a decision model");
-        assert(await connect.getByText(w.note).isVisible());
-        assert(await connect.getByText(w.hint).isVisible());
+        for (const text of [w.note, w.hint]) {
+          const source = connect.locator(".hint").filter({ hasText: text });
+          assert(await source.isHidden());
+          await source.locator("..").locator(".help-mark").focus();
+          assert((await page.locator(".help-pop").textContent()).includes(text));
+          await page.keyboard.press("Escape");
+        }
         const langs = await connect.locator(".segs").nth(1).locator(".opt").allTextContents();
         assert.deepEqual(langs, ["curl", "Python", "Node"], "no shell variables");
         let s = await snippet();
-        assert.match(s, /curl http:\/\/127\.0\.0\.1:3999\/v1\/systemone/);
+        const curl = await page.evaluate(() => /^Win/.test(navigator.platform) ? "curl.exe" : "curl");
+        assert(s.includes(curl + " http://127.0.0.1:3999/v1/systemone"));
         assert.match(s, /"model": "cf\/@cf\/typesafe\/jev"/);
         assert.match(s, /"questions"/);
         assert.match(s, /Authorization: Bearer magpie/);

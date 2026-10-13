@@ -1935,8 +1935,9 @@
         signBox = d.transport === "http" ? signInBox(s ? s.name : "", ready) : null;
         if (signBox) {
           appBox = el("div", "lib-app");
-          const f = field(t("OAuth app"), appBox, " ");
-          appHint = f[1].querySelector(".hint");
+          const f = field(t("OAuth app"), appBox);
+          appHint = el("div", "hint");
+          f[1].append(appHint);
           g.append(...f);
           g.append(...field(t("Sign-in"), signBox, t("For a server that asks you to sign in (OAuth): magpie signs in once, and every agent given it uses that sign-in")));
         } else appBox = null;

@@ -4198,6 +4198,7 @@
     draw();
     const mw = el("div");
     mw.append(box, el("div", "hint", t("The first answers for what the model can do. In order, they are tried top first.")));
+    helpHint(mw, mw.lastChild, t("Models"));
     ed.append(el("label", "", t("Models")), mw);
 
     // patterns: models found by their ids, now and as providers list new
@@ -4246,6 +4247,7 @@
     drawPats();
     const pw = el("div");
     pw.append(pbox, el("div", "hint", t("Every model a pattern matches is in the group, now and as providers list new ones, after the models above: * is any run of characters in provider/model, re: starts a regular expression.")));
+    helpHint(pw, pw.lastChild, t("Patterns"));
     ed.append(el("label", "", t("Patterns")), pw);
     // its models in the lists agents see too, or the group alone (#1783)
     const listHint = el("div", "hint", t(LIST_HINT[d.unlists ? "unlists" : ""])), listW = el("div");
@@ -4256,8 +4258,10 @@
 
     const rHint = el("div", "hint", t(GROUP_HINT[d.routing] || GROUP_HINT[""]));
     const rw = el("div");
-    rw.append(segs(GROUP_ROUTE_OPTS.map(([id, n]) => [id, t(n)]), d.routing, (v) => { d.routing = v; rHint.textContent = t(GROUP_HINT[v] || GROUP_HINT[""]); drawRules(); drawSink(); }), rHint);
-    rw.append(el("div", "hint", t(GROUP_NEST)));
+    const routingHelp = el("div");
+    routingHelp.append(rHint, "\n\n", el("div", "hint", t(GROUP_NEST)));
+    rw.append(segs(GROUP_ROUTE_OPTS.map(([id, n]) => [id, t(n)]), d.routing, (v) => { d.routing = v; rHint.textContent = t(GROUP_HINT[v] || GROUP_HINT[""]); drawRules(); drawSink(); }), routingHelp);
+    helpHint(rw, routingHelp, t("Routing"));
     ed.append(el("label", "", t("Routing")), rw);
     // one rate limited with quota left: its place, or the back
     const kHint = el("div", "hint"), kw = el("div", "sink-wrap"), kLab = el("label", "", t("Rate limited"));

@@ -1156,7 +1156,9 @@
     const head = el("div", "row-head ctx-sess-head");
     head.append(el("span", "label", t("Tuned for you")), el("span", "grow"));
     pane.append(head);
-    pane.append(el("p", "usage-note ctx-tune-note", t("Your own calls of the range, replayed setting by setting from your agents' session files: the settings that would have spent the fewest tokens, for how you work. Tokens are weighed as the vendor charges them: a cache read is a tenth of one.")));
+    const note = el("p", "usage-note ctx-tune-note", t("Your own calls of the range, replayed setting by setting from your agents' session files: the settings that would have spent the fewest tokens, for how you work. Tokens are weighed as the vendor charges them: a cache read is a tenth of one."));
+    head.append(note);
+    helpHint(head, note, t("Tuned for you"));
     if (!tuneData) {
       pane.append(el("p", "usage-note", t("Working it out from your sessions…")));
       return;
@@ -1204,7 +1206,9 @@
     const seen = el("div", "row-head ctx-sess-head");
     seen.append(el("span", "label", t("Through magpie")), el("span", "grow"));
     pane.append(seen);
-    pane.append(el("p", "usage-note", t("What each agent's prompts hold, as magpie's gateway read them: the score and tags are worked out from the requests of the range.")));
+    const note = el("p", "usage-note", t("What each agent's prompts hold, as magpie's gateway read them: the score and tags are worked out from the requests of the range."));
+    seen.append(note);
+    helpHint(seen, note, t("Through magpie"));
     if (!ctxData.agents.length) {
       const empty = el("div", "ctx-none");
       empty.append(el("b", "", t("No prompts read yet")), el("span", "", t("Requests your agents send through magpie show here.")));

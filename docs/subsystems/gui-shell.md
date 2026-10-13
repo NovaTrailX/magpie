@@ -32,6 +32,23 @@ three.
 
 ## Constraints and failure behavior
 
+### 字段用法说明
+
+[`app.js`](../../internal/gui/assets/app.js) 的 `field(label, control, hint)`
+将说明保留在隐藏的 DOM 节点中，控件和旁边的帮助按钮通过 `aria-describedby`
+引用它；已有的描述关联会保留。帮助按钮可通过 Tab 到达，悬停或聚焦时用
+现有 `.pop` 样式和 `placeMenu` 显示全文。指针可移入浮层继续阅读；Escape
+先关闭说明，保留表单和焦点。滚动外部区域、调整窗口或移除所属控件会关闭浮层。
+
+自定义布局通过 `helpHint(wrap, description, label)` 复用同一标记；路由组、
+用量上下文和回复设置也使用它。格式示例留在占位符中，说明保留默认值、限制和
+操作规则。状态、错误和即时后果仍常驻显示，例如供应商关闭状态、同步目的地
+切换提示和 OAuth 回调地址，不通过 `field` 的 `hint` 参数传入。
+
+`node --test internal/gui/tests/field-help.test.cjs` 在 Chromium 和 WebKit
+上覆盖五种语言、隐藏说明的可访问描述、组合控件、悬停、Tab、Escape、窄窗口和
+浮层清理。Playwright 使用已有安装，参见[浏览器测试说明](../../internal/gui/tests/README.md)。
+
 ### Streamed output speed
 
 Usage rows and aggregates use `Record.Decode` and `DecodeOf` in

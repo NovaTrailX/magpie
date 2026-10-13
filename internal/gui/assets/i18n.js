@@ -4,6 +4,9 @@
 // works. {name} slots are filled by t(str, vars).
 const I18N = {
   zh: {
+    "Help": "帮助",
+    "Help: {name}": "帮助：{name}",
+    "The amount in the reply; supports + - * / and brackets. Prefix with \"$\" for currency or suffix with \"%\" for a percentage bar. Separate labelled amounts with \";\".": "回复中的金额；支持 + - * / 和括号。前加 \"$\" 显示货币符号，后加 \"%\" 显示百分比进度条。多个带标签的金额用 \";\" 分隔。",
     "Get started": "快速上手",
     "{n} of {m} done": "已完成 {n}/{m}",
     "Hide Get started": "隐藏快速上手",
@@ -1668,7 +1671,6 @@ const I18N = {
     "Where the vendor lists its models, when that isn't under the base URL; asked with the key": "供应商的模型列表接口，不在基础地址下时填写；请求时会带上 Key",
     "Where the vendor tells what is left on the key, asked with it like a chat request; {key} in it or in a header is each key's own, for a vendor that takes the key in the URL (…?key={key}); shown on the Usage page": "查询 Key 余额的接口，像对话请求一样带 Key 请求；地址或请求头中的 {key} 替换为各 Key 自身的值，用于 Key 放在 URL 中的接口（…?key={key}）；结果显示在用量页",
     "Balance field": "余额字段",
-    "Where the amount is in the reply, e.g. data.balance; it can be a sum with + - * / and brackets, e.g. data.total / 500000 or (1 - credits.used / 70) %; \"$\" in front adds the sign, \"%\" after it shows a percent, with a bar; several, each with a label, go apart by \";\", e.g. 5h: a.used / a.cap %; $credits.left": "金额在返回 JSON 中的位置，例如 data.balance；可用 + - * / 和括号计算，例如 data.total / 500000 或 (1 - credits.used / 70) %；前加 \"$\" 显示币种符号，后加 \"%\" 显示为百分比和进度条；多个金额用 \";\" 分隔，可各加标签，例如 5h: a.used / a.cap %; $credits.left",
     "Balance": "余额",
     "Balances": "余额",
     "Updated {when}": "{when}更新",
@@ -4563,6 +4565,9 @@ const I18N = {
     "~/.dsh/settings.yaml sets its own DeepSeek endpoint or key, which dsh puts over magpie's; clear it in dsh's Models page to go through magpie.": "~/.dsh/settings.yaml 设置了自己的 DeepSeek 地址或 Key，dsh 会优先用它而不是 magpie 的；请在 dsh 的 Models 页面清除它，才能走 magpie。",
   },
   "zh-TW": {
+    "Help": "說明",
+    "Help: {name}": "說明：{name}",
+    "The amount in the reply; supports + - * / and brackets. Prefix with \"$\" for currency or suffix with \"%\" for a percentage bar. Separate labelled amounts with \";\".": "回覆中的金額；支援 + - * / 和括號。前加 \"$\" 顯示貨幣符號，後加 \"%\" 顯示百分比進度條。多個帶標籤的金額用 \";\" 分隔。",
     "Get started": "快速上手",
     "{n} of {m} done": "已完成 {n}/{m}",
     "Hide Get started": "隱藏快速上手",
@@ -6219,7 +6224,6 @@ const I18N = {
     "Where the vendor lists its models, when that isn't under the base URL; asked with the key": "供應商的模型列表介面，不在基礎位址下時填寫；請求時會帶上 Key",
     "Where the vendor tells what is left on the key, asked with it like a chat request; {key} in it or in a header is each key's own, for a vendor that takes the key in the URL (…?key={key}); shown on the Usage page": "查詢 Key 餘額的介面，像對話請求一樣帶 Key 請求；位址或請求頭中的 {key} 替換為各 Key 自身的值，用於 Key 放在 URL 中的介面（…?key={key}）；結果顯示在用量頁",
     "Balance field": "餘額欄位",
-    "Where the amount is in the reply, e.g. data.balance; it can be a sum with + - * / and brackets, e.g. data.total / 500000 or (1 - credits.used / 70) %; \"$\" in front adds the sign, \"%\" after it shows a percent, with a bar; several, each with a label, go apart by \";\", e.g. 5h: a.used / a.cap %; $credits.left": "金額在返回 JSON 中的位置，例如 data.balance；可用 + - * / 和括號計算，例如 data.total / 500000 或 (1 - credits.used / 70) %；前加 \"$\" 顯示幣種符號，後加 \"%\" 顯示為百分比和進度條；多個金額用 \";\" 分隔，可各加標籤，例如 5h: a.used / a.cap %; $credits.left",
     "Balance": "餘額",
     "Balances": "餘額",
     "Updated {when}": "{when}更新",
@@ -9105,6 +9109,9 @@ const I18N = {
     "~/.dsh/settings.yaml sets its own DeepSeek endpoint or key, which dsh puts over magpie's; clear it in dsh's Models page to go through magpie.": "~/.dsh/settings.yaml 設定了自己的 DeepSeek 位址或 Key，dsh 會優先用它而不是 magpie 的；請在 dsh 的 Models 頁面清除它，才能走 magpie。",
   },
   ja: {
+    "Help": "ヘルプ",
+    "Help: {name}": "ヘルプ：{name}",
+    "The amount in the reply; supports + - * / and brackets. Prefix with \"$\" for currency or suffix with \"%\" for a percentage bar. Separate labelled amounts with \";\".": "応答内の金額。+ - * / と括弧を使用できます。先頭に \"$\" を付けると通貨記号、末尾に \"%\" を付けると割合のバーを表示します。ラベル付きの金額を複数指定する場合は \";\" で区切ります。",
     "Get started": "はじめに",
     "{n} of {m} done": "{m} 件中 {n} 件完了",
     "Hide Get started": "「はじめに」を隠す",
@@ -10746,7 +10753,6 @@ const I18N = {
     "Where the vendor lists its models, when that isn't under the base URL; asked with the key": "ベース URL の下にない場合の、ベンダーがモデル一覧を返す場所。キー付きで問い合わせます",
     "Where the vendor tells what is left on the key, asked with it like a chat request; {key} in it or in a header is each key's own, for a vendor that takes the key in the URL (…?key={key}); shown on the Usage page": "ベンダーがキーの残量を返す場所。チャットリクエストと同様にキー付きで問い合わせます。URL やヘッダー内の {key} は各キー自身の値になります（キーを URL に含めるベンダー向け：…?key={key}）。使用量ページに表示されます",
     "Balance field": "残高フィールド",
-    "Where the amount is in the reply, e.g. data.balance; it can be a sum with + - * / and brackets, e.g. data.total / 500000 or (1 - credits.used / 70) %; \"$\" in front adds the sign, \"%\" after it shows a percent, with a bar; several, each with a label, go apart by \";\", e.g. 5h: a.used / a.cap %; $credits.left": "応答内で金額がある場所（例：data.balance）。+ - * / と括弧で計算でき（例：data.total / 500000 や (1 - credits.used / 70) %）、前に \"$\" を付けると通貨記号、後ろに \"%\" を付けるとバー付きのパーセント表示になります。複数はそれぞれラベルを付けて \";\" で区切ります（例：5h: a.used / a.cap %; $credits.left）",
     "Balance": "残高",
     "Balances": "残高",
     "Updated {when}": "{when}に更新",
@@ -13649,6 +13655,9 @@ const I18N = {
     "~/.dsh/settings.yaml sets its own DeepSeek endpoint or key, which dsh puts over magpie's; clear it in dsh's Models page to go through magpie.": "~/.dsh/settings.yaml に独自の DeepSeek エンドポイントやキーがあり、dsh は magpie のものよりそちらを優先します。magpie を経由するには dsh の Models ページで消してください。",
   },
   de: {
+    "Help": "Hilfe",
+    "Help: {name}": "Hilfe: {name}",
+    "The amount in the reply; supports + - * / and brackets. Prefix with \"$\" for currency or suffix with \"%\" for a percentage bar. Separate labelled amounts with \";\".": "Der Betrag in der Antwort; unterstützt + - * / und Klammern. Ein vorangestelltes \"$\" zeigt das Währungszeichen, ein nachgestelltes \"%\" einen Prozentbalken. Mehrere beschriftete Beträge mit \";\" trennen.",
     "Get started": "Erste Schritte",
     "{n} of {m} done": "{n} von {m} erledigt",
     "Hide Get started": "Erste Schritte ausblenden",
@@ -15292,7 +15301,6 @@ const I18N = {
     "Where the vendor lists its models, when that isn't under the base URL; asked with the key": "Wo der Anbieter seine Modelle auflistet, falls nicht unter der Basis-URL; wird mit dem Schlüssel abgefragt",
     "Where the vendor tells what is left on the key, asked with it like a chat request; {key} in it or in a header is each key's own, for a vendor that takes the key in the URL (…?key={key}); shown on the Usage page": "Wo der Anbieter das Restguthaben des Schlüssels meldet, abgefragt mit dem Schlüssel wie eine Chat-Anfrage; {key} darin oder in einem Header steht für den jeweiligen Schlüssel, für Anbieter, die den Schlüssel in der URL erwarten (…?key={key}); angezeigt auf der Seite Nutzung",
     "Balance field": "Guthabenfeld",
-    "Where the amount is in the reply, e.g. data.balance; it can be a sum with + - * / and brackets, e.g. data.total / 500000 or (1 - credits.used / 70) %; \"$\" in front adds the sign, \"%\" after it shows a percent, with a bar; several, each with a label, go apart by \";\", e.g. 5h: a.used / a.cap %; $credits.left": "Wo der Betrag in der Antwort steht, z. B. data.balance; auch eine Rechnung mit + - * / und Klammern ist möglich, z. B. data.total / 500000 oder (1 - credits.used / 70) %; \"$\" davor ergänzt das Währungszeichen, \"%\" dahinter zeigt einen Prozentwert mit Balken; mehrere, jeweils mit Bezeichnung, durch \";\" trennen, z. B. 5h: a.used / a.cap %; $credits.left",
     "Balance": "Guthaben",
     "Balances": "Guthaben",
     "Updated {when}": "Aktualisiert {when}",

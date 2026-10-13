@@ -7666,6 +7666,71 @@ function partnerTile(pr) {
 }
 
 let fieldIDs = 0;
+let activeHelp = null;
+function closeHelp() {
+  if (!activeHelp) return;
+  clearTimeout(activeHelp.timer);
+  activeHelp.observer.disconnect();
+  activeHelp.pop.remove();
+  activeHelp = null;
+}
+function showHelp(button, description) {
+  if (activeHelp?.button === button) { clearTimeout(activeHelp.timer); return; }
+  closeHelp();
+  const pop = el("div", "pop help-pop", description.textContent);
+  // 控件始终引用原说明；浮层只是视觉副本，避免读屏重复朗读。
+  pop.setAttribute("aria-hidden", "true");
+  document.body.append(pop);
+  placeMenu(pop, button);
+  const observer = new MutationObserver(() => {
+    if (!button.isConnected || !button.getClientRects().length) closeHelp();
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+  activeHelp = { button, pop, observer, timer: 0 };
+  pop.onpointerenter = () => clearTimeout(activeHelp?.timer);
+  pop.onpointerleave = leaveHelp;
+}
+function leaveHelp() {
+  if (!activeHelp || document.activeElement === activeHelp.button) return;
+  clearTimeout(activeHelp.timer);
+  // 给指针从标记移入浮层留出时间，长说明可以停留阅读、选择和滚动。
+  activeHelp.timer = setTimeout(closeHelp, 160);
+}
+function helpHint(wrap, description, label) {
+  if (!description.id) description.id = "field-help-" + ++fieldIDs;
+  description.setAttribute("role", "tooltip");
+  description.hidden = true;
+  const button = el("button", "help-mark");
+  button.type = "button";
+  button.setAttribute("aria-label", label ? t("Help: {name}", { name: label }) : t("Help"));
+  button.setAttribute("aria-describedby", description.id);
+  button.append(svg("M8 7v4M8 4.5v.5M14 8A6 6 0 1 1 2 8a6 6 0 0 1 12 0", 16, 1.4));
+  button.onpointerenter = button.onfocus = () => showHelp(button, description);
+  button.onpointerleave = leaveHelp;
+  button.onblur = () => { if (!activeHelp?.pop.matches(":hover") && !button.matches(":hover")) closeHelp(); };
+  button.onclick = (e) => { e.stopPropagation(); showHelp(button, description); };
+  wrap.classList.add("has-help");
+  wrap.append(button);
+  for (const control of wrap.querySelectorAll("input, select, textarea, button:not(.help-mark), [tabindex]")) {
+    const ids = new Set((control.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean));
+    ids.add(description.id);
+    control.setAttribute("aria-describedby", [...ids].join(" "));
+  }
+}
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape" || !activeHelp) return;
+  closeHelp();
+  e.preventDefault();
+  e.stopImmediatePropagation();
+}, true);
+document.addEventListener("pointerdown", (e) => {
+  if (activeHelp && !activeHelp.button.contains(e.target) && !activeHelp.pop.contains(e.target)) closeHelp();
+}, true);
+document.addEventListener("scroll", (e) => {
+  if (activeHelp && !activeHelp.pop.contains(e.target)) closeHelp();
+}, true);
+window.addEventListener("resize", closeHelp);
+
 function field(label, control, hint) {
   const l = el("label", "", label);
   const wrap = el("div");
@@ -7683,7 +7748,7 @@ function field(label, control, hint) {
     const help = el("div", "hint", hint);
     help.id = "field-help-" + ++fieldIDs;
     wrap.append(help);
-    for (const input of inputs) input.setAttribute("aria-describedby", [input.getAttribute("aria-describedby"), help.id].filter(Boolean).join(" "));
+    helpHint(wrap, help, label);
   }
   return [l, wrap];
 }
@@ -9482,7 +9547,7 @@ function drawEditor(p, presetID) {
       balPair.append(res);
       balPair.classList.add("wrap");
     }
-    inner.append(...field(t("Balance field"), balPair, t("Where the amount is in the reply, e.g. data.balance; it can be a sum with + - * / and brackets, e.g. data.total / 500000 or (1 - credits.used / 70) %; \"$\" in front adds the sign, \"%\" after it shows a percent, with a bar; several, each with a label, go apart by \";\", e.g. 5h: a.used / a.cap %; $credits.left")));
+    inner.append(...field(t("Balance field"), balPair, t("The amount in the reply; supports + - * / and brackets. Prefix with \"$\" for currency or suffix with \"%\" for a percentage bar. Separate labelled amounts with \";\".")));
     more.append(inner);
     ed.append(more);
   }
@@ -21307,8 +21372,9 @@ function davForm(v) {
     ...field("", pathL, t("MinIO and most NAS servers need it."))];
   const names = { webdav: "WebDAV", s3: "S3" };
   // which one is synced to, and that the other's settings stay
-  const to = field(t("Sync to"), segs([["webdav", "WebDAV"], ["s3", "S3"]].map(([id, n]) => [id, id === active ? t("{kind} · on", { kind: n }) : n]), kind, (k) => { kind = k; show(); }), " ");
-  const where = to[1].querySelector(".hint");
+  const to = field(t("Sync to"), segs([["webdav", "WebDAV"], ["s3", "S3"]].map(([id, n]) => [id, id === active ? t("{kind} · on", { kind: n }) : n]), kind, (k) => { kind = k; show(); }));
+  const where = el("div", "hint");
+  to[1].append(where);
   const save = el("button", "text primary", "");
   const show = () => {
     for (const x of davFields) x.hidden = kind !== "webdav";
@@ -22371,6 +22437,8 @@ function renderReplies(s, keep) {
   lval.append(segs([["off", t("Off")], ["on", t("On")]], s.noLoopGuard ? "off" : "on",
     (v) => savePrefs({ ...keep, noLoopGuard: v === "off" })));
   l.append(lwho, lval);
+  helpHint(who, who.querySelector(".sub"), t("Name the member in replies"));
+  helpHint(lwho, lwho.querySelector(".sub"), t("Stop looping replies"));
   box.append(r, l);
 }
 

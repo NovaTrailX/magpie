@@ -73,7 +73,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       }
       assert.equal(await row.locator(".name").textContent(), w.name);
       assert((await row.locator(".sub").textContent()).includes(w.sub));
-      for (const part of [".name", ".sub", ".segs"]) {
+      assert(await row.locator(".sub").isHidden(), "instructions are kept in help");
+      await row.locator(".help-mark").focus();
+      assert.equal(await page.locator(".help-pop").textContent(), await row.locator(".sub").textContent());
+      await page.keyboard.press("Escape");
+      for (const part of [".name", ".help-mark", ".segs"]) {
         const fit = await row.locator(part).first().evaluate((e) => {
           const r = e.getBoundingClientRect();
           return e.scrollWidth <= e.clientWidth + 1 && r.width > 0 && r.right <= innerWidth + 1;

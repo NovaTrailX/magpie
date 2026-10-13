@@ -111,12 +111,20 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal((await status.textContent()).trim(), w("{names} not set", { names: "GH_TOKEN" }));
         assert.equal((await status.getAttribute("title")).split("\n")[0], w("magpie can't check it: {names} isn't set where magpie runs. An agent started where it is set still gets it", { names: "GH_TOKEN" }));
 
-        // the editor: the hint under Headers, the chip greyed with the reason
+        // the editor: Headers help, the chip greyed with the reason
         await row("gh").locator(".sub").click();
         const sheet = page.locator("#modal .lib-editor");
         await sheet.waitFor();
         const hint = w("A value can name a variable, as {ref}: each agent is given it in its own way, so the token stays out of its settings", { ref: "${NAME}" });
-        await sheet.getByText(hint, { exact: true }).waitFor();
+        const readHelp = async () => {
+          const source = sheet.getByText(hint, { exact: true });
+          await source.waitFor({ state: "attached" });
+          assert(await source.isHidden());
+          await source.locator("..").locator(".help-mark").focus();
+          assert.equal(await page.locator(".help-pop").textContent(), hint);
+          await page.keyboard.press("Escape");
+        };
+        await readHelp();
         const chip = sheet.locator('.lib-ag[data-agent="agy"]');
         assert.equal(await chip.getAttribute("aria-disabled"), "true");
         assert.equal(await chip.getAttribute("title"), why);
@@ -135,7 +143,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // a command's environment says the same
         await row("fs").locator(".sub").click();
         await sheet.waitFor();
-        await sheet.getByText(hint, { exact: true }).waitFor();
+        await readHelp();
         await sheet.locator(".lib-pair").first().locator("input").nth(1).fill("${ROOT_DIR}");
         await page.waitForFunction(() => document.querySelector('#modal .lib-editor .lib-ag[data-agent="agy"]')?.getAttribute("aria-disabled") === "true");
         assert.deepEqual(await sideways(page), [], "sideways scroll in the command's editor");
