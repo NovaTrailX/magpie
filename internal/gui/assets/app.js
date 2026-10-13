@@ -290,10 +290,12 @@ function status(msg, kind = "", ms = kind === "err" ? 8000 : 3500) {
   s.textContent = msg;
   s.title = msg;
   s.className = "status " + kind;
+  const multiline = !!msg && msg.includes("\n");
+  s.classList.toggle("multiline", multiline);
   s.setAttribute("role", kind === "err" ? "alert" : "status");
   // with a dialog open the footer is under its scrim: the pill floats over both
   const m = $("#modal");
-  s.classList.toggle("lift", !!msg && !m.hidden && !m.classList.contains("out"));
+  s.classList.toggle("lift", !!msg && (multiline || !m.hidden && !m.classList.contains("out")));
   clearTimeout(status.t);
   if (msg) status.t = setTimeout(() => { s.textContent = ""; s.className = "status"; }, ms);
 }
@@ -7705,7 +7707,11 @@ function helpHint(wrap, description, label) {
   button.setAttribute("aria-label", label ? t("Help: {name}", { name: label }) : t("Help"));
   button.setAttribute("aria-describedby", description.id);
   button.append(svg("M8 7v4M8 4.5v.5M14 8A6 6 0 1 1 2 8a6 6 0 0 1 12 0", 16, 1.4));
-  button.onpointerenter = button.onfocus = () => showHelp(button, description);
+  button.onpointerenter = () => showHelp(button, description);
+  // 先让聚焦导致的滚动完成，否则滚动事件会立刻关闭刚打开的说明。
+  button.onfocus = () => requestAnimationFrame(() => {
+    if (document.activeElement === button && button.isConnected) showHelp(button, description);
+  });
   button.onpointerleave = leaveHelp;
   button.onblur = () => { if (!activeHelp?.pop.matches(":hover") && !button.matches(":hover")) closeHelp(); };
   button.onclick = (e) => { e.stopPropagation(); showHelp(button, description); };
@@ -22353,9 +22359,10 @@ function renderSearcher(s, keep, box) {
   const r = el("div", "row pref searcher-row");
   const who = el("div", "who");
   const sub = el("div", "sub", off ? t("When provider search is off, only configured Search APIs are used. Without a Search API, magpie does not add a search tool. Providers' native web search is unchanged.") : t("When a model can't search the web directly, the selected provider searches for it and returns the results. Searches may use the service's quota or incur charges; if the provider magpie picks fails, it tries other available sources, but a provider you select here is never replaced by another provider, only by your Search APIs."));
+  const noteSep = locale === "zh" ? "\n" : " · ";
   if (!off && v && s.searchUnused) {
     const why = { gone: t("it is no longer in magpie"), off: t("it is turned off"), cant: t("it can't search the web by itself"), nomodel: t("it lists no model") }[s.searchUnused] || s.searchUnused;
-    sub.append(" · ", el("span", "warn searcher-unused", t("{who} isn't used: {why}, so magpie picks one", { who: named(v), why })));
+    sub.append(noteSep, el("span", "warn searcher-unused", t("{who} isn't used: {why}, so magpie picks one", { who: named(v), why })));
   }
   // the one named didn't search last time, and no other provider searched
   // in its place (Gearclickist on Discord: Grok picked answered without
@@ -22364,18 +22371,18 @@ function renderSearcher(s, keep, box) {
   const failed = s.searchFailed;
   if (!off && v && !s.searchUnused && failed) {
     const why = failed.notSearched ? t("it answered without searching the web, so its account or plan may not offer web search") : failed.nothingFound ? t("its reply named no page it found") : failed.why || t("it failed");
-    sub.prepend(el("span", "warn searcher-failed", t("{who} didn't search {when}: {why}. No other provider searched in its place; pick Automatic or another provider, or add a Search API.", { who: named(v), when: ago(failed.at), why })), " · ");
+    sub.prepend(el("span", "warn searcher-failed", t("{who} didn't search {when}: {why}. No other provider searched in its place; pick Automatic or another provider, or add a Search API.", { who: named(v), when: ago(failed.at), why })), noteSep);
   }
   const plans = choices.filter((c) => c.service).map((c) => c.name);
-  if (!off && plans.length) sub.append(" · ", el("span", "searcher-own",
+  if (!off && plans.length) sub.append(noteSep, el("span", "searcher-own",
     t("A Kimi Code plan ({names}) searches for its own models first, with its web search; for other models only when named here", { names: plans.join(", ") })));
   const googles = choices.filter((c) => c.own).map((c) => c.name);
-  if (!off && googles.length) sub.append(" · ", el("span", "searcher-own",
+  if (!off && googles.length) sub.append(noteSep, el("span", "searcher-own",
     t("{names} search for their own models first, with Gemini's Google Search", { names: googles.join(", ") })));
-  if (!off && s.searchRelays?.length) sub.append(" · ", el("span", "searcher-relays",
+  if (!off && s.searchRelays?.length) sub.append(noteSep, el("span", "searcher-relays",
     t("These relays must be selected manually and are not used for automatic selection or fallback: {names}.", { names: s.searchRelays.join(", ") })));
   // Being left out can also mean no usable model, not just no search support.
-  if (!off && s.searchLeftOut?.length) sub.append(" · ", el("span", "searcher-left-out",
+  if (!off && s.searchLeftOut?.length) sub.append(noteSep, el("span", "searcher-left-out",
     t("These providers can't be selected to search for other models with the current configuration: {names}. Their models can still get search results through other available search providers or configured search APIs.", { names: s.searchLeftOut.length > 6
       ? t("{names} and {n} more", { names: s.searchLeftOut.slice(0, 5).join(", "), n: s.searchLeftOut.length - 5 })
       : s.searchLeftOut.join(", ") })));

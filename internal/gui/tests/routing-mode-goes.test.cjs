@@ -59,7 +59,7 @@ function serve(lang, scene) {
 // the words, as each language says them
 const lone = {
   en: "Only one account or key is on for this, so routing has nothing to choose between. Turn on a second in the provider's editor, and how it routes is set under Several accounts or keys below.",
-  zh: "此处只启用了一个账号或密钥，因此没有可供路由选择的对象。请在供应商编辑页启用第二个；路由方式可在下方「多个账号或密钥」中设置。",
+  zh: "这里只启用了一个账号或密钥，路由没有可选择的对象。请到供应商编辑页启用第二个。然后在下方「多个账号或密钥」中设置路由方式。",
   "zh-TW": "這裡只開了一個帳號或 Key，路由沒有可選的。在供應商的編輯頁再開一個，路由方式就在下面的「多帳號 / 多 Key」裡設定。",
   ja: "有効なアカウントやキーが 1 つだけなので、ルーティングに選択肢はありません。プロバイダの編集画面で 2 つ目を有効にすると、ルーティングは下の「複数のアカウントやキー」で設定できます。",
   de: "Hier ist nur ein Konto oder Schlüssel aktiv, also hat die Weiterleitung keine Wahl. Aktiviere im Editor des Anbieters ein zweites; wie weitergeleitet wird, legst du dann unten unter „Mehrere Konten oder Schlüssel“ fest.",

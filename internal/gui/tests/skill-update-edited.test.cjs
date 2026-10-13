@@ -71,7 +71,7 @@ const scrolls = (page) => page.evaluate(() => [...document.querySelectorAll("*")
 
 const words = {
   en: { said: "2 skills have updates", edited: "Changed here", updN: "Update 1", head: "Replace your changes to pdf?", keep: "Keep mine", update: "Update", done: "pdf is up to date; your version is in the backups", tip: "You changed it since it was fetched from GitHub. Updating asks before it replaces your changes." },
-  zh: { said: "2 个技能有更新", edited: "本地已改动", updN: "更新 1 个", head: "用 GitHub 的版本替换你对 pdf 的改动？", keep: "保留我的", update: "更新", done: "pdf 已是最新，你的版本已存入备份", tip: "从 GitHub 获取后你在本地改动过它。更新前会先询问，不会直接覆盖你的改动。" },
+  zh: { said: "2 个技能有更新", edited: "本地已改动", updN: "更新 1 个", head: "用 GitHub 的版本替换你对 pdf 的改动？", keep: "保留我的", update: "更新", done: "pdf 已是最新，你的版本已存入备份", tip: "从 GitHub 获取后，你在本地修改过此技能。\n更新前会先询问，确认后才会替换你的修改。" },
 };
 
 const shots = process.env.ARTIFACT_DIR;

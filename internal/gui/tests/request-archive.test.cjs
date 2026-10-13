@@ -84,9 +84,9 @@ const words = {
   },
   zh: {
     name: "请求存档", fetch: "从存档取回", failed: "上传失败", failedWhy: "上次上传失败：HTTP 403",
-    setup: "请先在设置的“同步与备份”中填写 s3:// 地址",
-    refused: "请求存档会上传到同步备份所用的 S3 存储桶：请先在设置的“同步与备份”中填写 s3:// 地址",
-    bucket: "每次调用的请求/响应头和正文去除密钥后存到 bkt/team on https://s3.example.com",
+    setup: "请先在设置的「同步与备份」中填写 s3:// 地址。",
+    refused: "请求存档会上传到同步备份使用的 S3 存储桶。请先在设置的「同步与备份」中填写 s3:// 地址。",
+    bucket: "每次调用的请求/响应头和正文会先去除密钥，再保存到 bkt/team on https://s3.example.com。",
   },
 };
 

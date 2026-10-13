@@ -28,8 +28,8 @@ const words = {
     sharedHint: "Agents are offered the levels every model has: low, high, max.", namedHint: "Agents are offered these. A model without the level asked is sent the one it has nearest.",
     none: "Pick a level to offer, or leave them to its models" },
   zh: { edit: "编辑", save: "保存", levels: "推理档位", shared: "成员共有", named: "自定",
-    sharedHint: "对 Agent 提供所有模型都有的档位：low, high, max。", namedHint: "向 Agent 提供这些档位。模型没有所选档位时按最接近的发送。",
-    none: "请至少选一个档位，或改回成员共有" },
+    sharedHint: "Agent 可选的推理档位为组内所有模型共同支持的档位（low, high, max）。", namedHint: "向 Agent 提供这些推理档位。模型不支持所选档位时，会使用最接近的档位。",
+    none: "选择要提供的推理档位，或使用成员共有的档位" },
 };
 
 function serve(lang, posts) {

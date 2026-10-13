@@ -69,7 +69,7 @@ const W = {
     hint: "Codex's lead may name another model for a subagent; set the subagent model to hold every subagent to one",
     pick: "Lead's pick", note: "GPT-6.1 Sol unless the lead names another" },
   zh: { lead: "子代理：由主代理自选，未指定时同主模型", set: "子代理：GPT-6.1 Sol", same: "子代理：同主模型",
-    hint: "Codex 的主代理可以给子代理指定别的模型；要让每个子代理都用同一个模型，请设置子代理模型",
+    hint: "Codex 主代理可以为子代理指定其他模型。要让所有子代理都使用同一模型，请设置子代理模型。",
     pick: "由主代理自选", note: "GPT-6.1 Sol，主代理指定其他模型时除外" },
   "zh-TW": { lead: "子代理：由主代理自選，未指定時同主模型", set: "子代理：GPT-6.1 Sol", same: "子代理：同主模型",
     hint: "Codex 的主代理可以給子代理指定別的模型；要讓每個子代理都用同一個模型，請設定子代理模型",

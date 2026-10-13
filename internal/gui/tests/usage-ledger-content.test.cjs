@@ -87,8 +87,8 @@ const L = {
     why: ["No session was named with this request, so its session file can't be found", "magpie reads the session files of Claude Code, Claude Desktop and Codex only", "This request isn't in the agent's session files: they may be deleted, moved, or not written yet"],
     src: "Read from the agent's session file; magpie keeps no copy" },
   zh: { loading: "加载中…", input: "输入", output: "输出", roles: ["你", "上下文"], out: ["思考", "助手", "工具调用", "助手"], tool: "工具结果", more: "展开全部", less: "收起", cut: "……还有 250 个字符未显示", whole: "内容太多，这里只显示了一部分",
-    why: ["此请求未带会话 ID，找不到其会话文件", "magpie 只读 Claude Code、Claude Desktop 和 Codex 的会话文件", "Agent 会话文件中没有此请求：文件可能已删除、移走或尚未写入"],
-    src: "读自 Agent 的会话文件，magpie 不保存副本" },
+    why: ["此请求没有会话 ID，因此无法找到对应的会话文件。", "magpie 只读取 Claude Code、Claude Desktop 和 Codex 的会话文件。", "Agent 的会话文件中没有此请求。文件可能已删除、移动或尚未写入。"],
+    src: "从 Agent 的会话文件读取。magpie 不保存副本。" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {

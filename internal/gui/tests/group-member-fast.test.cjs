@@ -35,8 +35,8 @@ const words = {
     ownOff: 'Sent as the agent asks; click to ask your provider for OpenAI\'s fast mode (service_tier "priority")',
     ownOn: 'Asked for OpenAI\'s fast mode (service_tier "priority") whatever the agent asks: quicker, at a higher price, where your provider serves it. One that turns it away is asked without it' },
   zh: { edit: "编辑", save: "保存", fast: "快速", std: "标准速度", label: "gpt-6.1-sol · high 推理强度 · 快速", remove: "移除",
-    ownOff: '按 Agent 的请求发送；点击后向供应商请求 OpenAI 快速模式（service_tier "priority"）',
-    ownOn: '无论 Agent 如何请求，都向供应商请求 OpenAI 快速模式（service_tier "priority"）；供应商支持时速度更快、价格更高。若供应商拒绝此参数，则去掉该参数后重试。' },
+    ownOff: '按 Agent 的请求发送。点击后会向供应商请求 OpenAI 快速模式（service_tier "priority"）。',
+    ownOn: '无论 Agent 如何请求，都会发送 OpenAI 快速模式参数（service_tier "priority"）。\n供应商支持时，速度更快、价格更高。\n如果供应商不接受该参数，请求会去掉它后继续发送。' },
 };
 
 function serve(lang, posts) {

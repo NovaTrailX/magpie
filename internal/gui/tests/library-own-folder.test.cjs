@@ -78,10 +78,10 @@ const words = {
   },
   zh: {
     here: "在资源库文件夹中，但未列入",
-    bring: "在原处列入资源库，不移动文件：可分配给任何 Agent",
-    always: (a) => `${a} 会自行读取此技能所在的 ~/.agents/skills，无论是否勾选都能使用`,
-    stays: "将从所有已启用的 Agent 中移除，链接的原文件夹保持不动。",
-    moved: "将从所有已启用的 Agent 中移除，文件夹移到 magpie 的备份。",
+    bring: "技能会在原位置列入资源库，不会移动文件。之后可将它分配给任何 Agent。",
+    always: (a) => `${a} 会自行读取存放此技能的 ~/.agents/skills。\n无论此处是否勾选，都能使用此技能。`,
+    stays: "此技能会从所有已启用的 Agent 中移除。\n链接来源文件夹会保留在原处。",
+    moved: "此技能会从所有已启用的 Agent 中移除。\n其文件夹会移入 magpie 的备份。",
     cancel: "取消",
   },
 };

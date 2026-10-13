@@ -55,7 +55,7 @@ function serve(lang) {
 
 const want = {
   en: { said: "It said: " + vendor, hint },
-  zh: { said: "原话：" + vendor, hint: "供应商的网络防火墙拦截了此 IP 的请求；请稍后再试，或更换网络或代理" },
+  zh: { said: "原话：" + vendor, hint: "供应商的网络防火墙拦截了来自此 IP 的请求。请稍后重试，或更换网络或代理。" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {

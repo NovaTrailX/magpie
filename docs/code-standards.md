@@ -169,6 +169,7 @@ applies:
 
 - Every string the user sees goes through `t()` and gets its translations in `i18n.js`. Tests run in Chinese and English.
 - 中文界面说明直接写操作、条件和结果，保留具体默认值、限制与技术名称。润色插值文案前检查调用处：占位符可能已包含单位或时间后缀，也可能代表时长而非次数；不要按变量名猜含义。
+- 同类说明保持一致的标点：完整解释句用句号，标题、按钮、占位符和状态短语不加句号。长说明按操作、条件或例外分行，保留相关信息之间的联系；不要用分号串起整段规则，也不要机械删除代码、地址或错误上下文中的冒号。
 - Use no native `<select>`. Dropdowns use the app's own menu (`openProtoMenu`).
 - A click never scrolls the page (`scrollOnPurpose`).
 - Don't use colored left-border stripes. Mark state with a dot or a swatch.

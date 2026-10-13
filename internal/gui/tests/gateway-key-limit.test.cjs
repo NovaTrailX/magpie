@@ -62,6 +62,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await ed.waitFor();
       assert.deepEqual(await scrolled(), at, "opening the editor moved the page");
       assert.equal(await ed.evaluate((e) => getComputedStyle(e).borderLeftStyle), "none");
+      if (zh) {
+        const hint = ed.locator(":scope > .hint:not(.klf-err)").first();
+        const text = await hint.textContent();
+        assert(text.includes("\n"), "限额的计数、费用与周期规则分行说明");
+        assert.equal(await hint.innerText(), text, "页面保留限额说明中的主动换行");
+      }
       await ed.getByRole("textbox", { name: w.tokens, exact: true }).fill("2M");
       // the window is the app's own menu, not a native select
       assert.equal(await ed.locator("select").count(), 0, "no native select");

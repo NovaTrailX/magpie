@@ -50,7 +50,7 @@ function serve(lang) {
 
 const words = {
   en: ["This plan's usage needs the account's AccessKey ID and Secret — give them in the provider's settings", "This plan's usage needs the account's SecretId and SecretKey — give them in the provider's settings", "Open settings"],
-  zh: ["此套餐的用量需要账号的 AccessKey ID 和 Secret 才能读取，请在服务商设置里填写", "此套餐的用量需要账号的 SecretId 和 SecretKey 才能读取，请在服务商设置里填写", "打开设置"],
+  zh: ["读取此套餐的用量需要账号的 AccessKey ID 和 Secret。请在供应商设置中填写。", "读取此套餐的用量需要账号的 SecretId 和 SecretKey。请在供应商设置中填写。", "打开设置"],
   "zh-TW": ["此方案的用量需要帳號的 AccessKey ID 和 Secret 才能讀取，請在服務商設定中填寫", "此方案的用量需要帳號的 SecretId 和 SecretKey 才能讀取，請在服務商設定中填寫", "開啟設定"],
   ja: ["このプランの使用量を読むにはアカウントの AccessKey ID と Secret が必要です。プロバイダの設定で入力してください", "このプランの使用量を読むにはアカウントの SecretId と SecretKey が必要です。プロバイダの設定で入力してください", "設定を開く"],
   de: ["Die Nutzung dieses Tarifs wird mit der AccessKey ID und dem Secret des Kontos gelesen – geben Sie sie in den Einstellungen des Anbieters an", "Die Nutzung dieses Tarifs wird mit der SecretId und dem SecretKey des Kontos gelesen – geben Sie sie in den Einstellungen des Anbieters an", "Einstellungen öffnen"],

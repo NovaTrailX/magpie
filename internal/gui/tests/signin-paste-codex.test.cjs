@@ -48,7 +48,7 @@ const W = {
     field: "Callback URL", finish: "Finish sign-in",
   },
   zh: {
-    say: "若浏览器最终停在打不开的页面（magpie 运行在服务器或 Docker 中），请复制其完整地址粘贴到这里。",
+    say: "如果浏览器最终停在无法打开的页面（例如 magpie 运行在服务器或 Docker 中），请复制该页面的完整地址并粘贴到这里。",
     field: "回调 URL", finish: "完成登录",
   },
 };

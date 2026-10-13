@@ -104,7 +104,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     t.after(() => browser.close());
     const I = {
       en: { h: "Subscriptions and gateway middleware", p: /middleware in magpie's gateway/, a: "Write a middleware", url: "https://usemagpie.ai/docs/plugins#middleware", trust: /sign-in or your requests/ },
-      zh: { h: "订阅与网关中间件", p: /magpie 网关里的中间件/, a: "编写中间件", url: "https://usemagpie.ai/docs/zh/plugins#middleware", trust: /登录或看到你的请求/ },
+      zh: { h: "订阅与网关中间件", p: /magpie 网关的中间件/, a: "编写中间件", url: "https://usemagpie.ai/docs/zh/plugins#middleware", trust: /登录信息或处理你的请求/ },
     };
     for (const lang of ["en", "zh"]) {
       await t.test(lang, async () => {
@@ -140,7 +140,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     t.after(() => browser.close());
     const O = {
       en: { installed: "Installed", options: "Options", save: "Save", note: "Not set: these are its package's example", bad: /^Not JSON: /, obj: "Options are a JSON object" },
-      zh: { installed: "已安装", options: "选项", save: "保存", note: "未设置：这是包里给的示例", bad: /^不是 JSON：/, obj: "选项须是一个 JSON 对象" },
+      zh: { installed: "已安装", options: "选项", save: "保存", note: "尚未设置，当前显示的是插件包提供的示例", bad: /^不是 JSON：/, obj: "选项须是一个 JSON 对象" },
     };
     for (const lang of ["en", "zh"]) {
       await t.test(lang, async () => {

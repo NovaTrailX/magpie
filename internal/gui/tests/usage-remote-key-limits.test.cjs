@@ -65,7 +65,7 @@ const words = {
   en: { head: "Gateway keys · Office", tokens: "Tokens today", spend: "Spend today", count: "1,050 / 10,000 tokens", cycle: "Tokens this cycle", unlimited: "Unlimited",
     line: "7-day cycle · 2 calls · Used up: that computer refuses this key until it resets", calls: "3 calls", old: "That computer's magpie is too old to tell this key's limit — update magpie there" },
   zh: { head: "网关密钥 · Office", tokens: "今日 Token", spend: "今日花费", count: "1,050 / 10,000 token", cycle: "本周期 Token", unlimited: "不限",
-    line: "7 天周期 · 2 次调用 · 额度已用完：那台电脑会在额度重置前拒绝此密钥", calls: "3 次调用", old: "那台电脑的 magpie 版本太旧，无法告知这个密钥的限额 — 请在那边更新 magpie" },
+    line: "7 天周期 · 2 次调用 · 额度已用完。额度重置前，那台电脑会拒绝此密钥。", calls: "3 次调用", old: "那台电脑上的 magpie 版本过旧，无法查询此密钥的限额。请更新那台电脑上的 magpie。" },
   "zh-TW": { head: "閘道金鑰 · Office", tokens: "今日 Token", spend: "今日花費", count: "1,050 / 10,000 token", cycle: "本週期 Token", unlimited: "無限",
     line: "7 天週期 · 2 次呼叫 · 已用完：那臺電腦在重設前會拒絕這個金鑰", calls: "3 次呼叫", old: "那臺電腦的 magpie 版本太舊，無法告知這個金鑰的限額 — 請在那邊更新 magpie" },
   ja: { head: "ゲートウェイキー · Office", tokens: "今日のトークン", spend: "今日の費用", count: "1,050 / 10,000 トークン", cycle: "この周期のトークン", unlimited: "無制限",

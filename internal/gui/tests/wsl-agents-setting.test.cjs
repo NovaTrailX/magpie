@@ -16,7 +16,7 @@ const { watchSettingsReads, settingsDrawn } = require("./reader.cjs");
 const assets = path.resolve(__dirname, "../assets");
 const words = {
   en: { name: "Detect agents in WSL", sub: "Looks in running WSL distros for agents to set up, their sessions and Claude Code; off, WSL is never asked anything and the agents found there are no longer shown", on: "On", off: "Off" },
-  zh: { name: "检测 WSL 中的 Agent", sub: "在运行中的 WSL 发行版里查找可接入的 Agent、它们的会话和 Claude Code；关闭后不再向 WSL 询问任何内容，之前在那里找到的 Agent 也不再显示", on: "开启", off: "关闭" },
+  zh: { name: "检测 WSL 中的 Agent", sub: "在运行中的 WSL 发行版中查找可接入的 Agent、它们的会话和 Claude Code。\n关闭后，magpie 不再查询 WSL，也不再显示在那里找到的 Agent。", on: "开启", off: "关闭" },
   "zh-TW": { name: "偵測 WSL 中的 Agent", sub: "在執行中的 WSL 發行版裡尋找可接入的 Agent、它們的工作階段和 Claude Code；關閉後不再向 WSL 詢問任何內容，之前在那裡找到的 Agent 也不再顯示", on: "開啟", off: "關閉" },
   ja: { name: "WSL のエージェントを検出", sub: "実行中の WSL ディストリビューションで、設定できるエージェント、そのセッション、Claude Code を探します。オフにすると WSL には一切問い合わせず、そこで見つかったエージェントも表示しません", on: "オン", off: "オフ" },
   de: { name: "Agenten in WSL erkennen", sub: "Sucht in laufenden WSL-Distributionen nach einrichtbaren Agenten, ihren Sitzungen und Claude Code; aus, wird WSL nie etwas gefragt, und die dort gefundenen Agenten werden nicht mehr angezeigt", on: "An", off: "Aus" },

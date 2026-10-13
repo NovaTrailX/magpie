@@ -31,7 +31,7 @@ const groups = () => ({
 
 const words = {
   en: { edit: "Edit", add: "Add a rule", intent: "Route by what it asks for", more: "It can pick the model too: add a rule with an intent", told: "Intent told by", save: "Save" },
-  zh: { edit: "编辑", add: "添加规则", intent: "按意图分流", more: "它也能挑模型：添加一条带意图的规则", told: "意图判断模型", save: "保存" },
+  zh: { edit: "编辑", add: "添加规则", intent: "按意图分流", more: "也可以按意图选择模型。添加一条带有意图条件的规则即可。", told: "意图判断模型", save: "保存" },
 };
 
 function serve(lang, posts) {

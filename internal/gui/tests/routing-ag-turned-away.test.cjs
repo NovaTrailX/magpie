@@ -57,7 +57,7 @@ function serve(lang) {
 
 const want = {
   en: { said: "It said: " + vendor, hint, fail: "agent's prompt turned away", quota: "quota used up" },
-  zh: { said: "原话：" + vendor, hint: "Antigravity 对 Claude Code 和 Claude Agent SDK（Claude Desktop 的对话）的系统提示词都会回这个 429，与剩余额度无关，所以这不是额度用尽，等待也不会好；请用其他供应商处理这些对话，或在路由分组中把另一个供应商排在 Antigravity 之后", fail: "Agent 的提示词被拒", quota: "额度用尽" },
+  zh: { said: "原话：" + vendor, hint: "无论剩余额度多少，Antigravity 都会对 Claude Code 和 Claude Agent SDK（Claude Desktop 的聊天）的系统提示词请求返回 429。\n这不是额度问题，等待也无法解决。\n请为这些聊天改用其他供应商，或在路由组中将另一家供应商排在 Antigravity 后面。", fail: "Agent 的提示词被拒", quota: "额度用尽" },
   "zh-TW": { said: "原話：" + vendor, hint: "Antigravity 對 Claude Code 和 Claude Agent SDK（Claude Desktop 的對話）的系統提示詞都會回這個 429，與剩餘額度無關，所以這不是額度用盡，等待也不會好；請用其他供應商處理這些對話，或在路由分組中把另一個供應商排在 Antigravity 之後", fail: "Agent 的提示詞被拒", quota: "額度用盡" },
   ja: { said: "メッセージ：" + vendor, hint: "Antigravity は Claude Code と Claude Agent SDK（Claude Desktop のチャット）のシステムプロンプトに対し、残りクォータに関係なくこの 429 を返します。クォータ切れではなく、待っても解決しません。これらのチャットには別のプロバイダを使うか、ルーティンググループで Antigravity の後に別のプロバイダを置いてください", fail: "エージェントのプロンプトを拒否", quota: "クォータ切れ" },
   de: { said: "Meldung: " + vendor, hint: "Antigravity beantwortet den System-Prompt von Claude Code und dem Claude Agent SDK (Chats in Claude Desktop) mit diesem 429, egal wie viel Kontingent übrig ist – das Kontingent ist also nicht aufgebraucht, und Warten hilft nicht; nutzen Sie für diese Chats einen anderen Anbieter oder setzen Sie in einer Routing-Gruppe einen hinter Antigravity", fail: "Prompt des Agenten abgelehnt", quota: "Kontingent aufgebraucht" },

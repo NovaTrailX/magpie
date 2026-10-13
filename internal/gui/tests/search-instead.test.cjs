@@ -20,9 +20,9 @@ const words = {
     notSearched: /grok\/grok-4\.3, the searcher magpie picked, didn't search for Codex's zai\/glm-5\.2: it answered without searching the web, so its account or plan may not offer web search\. So magpie had codex\/gpt-6\.1-sol/,
   },
   zh: {
-    failed: /grok\/grok-4\.3 是「设置 › 模型 › 联网搜索」中选定的代搜模型，未能为 Codex 的 zai\/glm-5\.2 搜索：502 upstream closed。magpie 已改用下一个可用的代搜模型 codex\/gpt-6\.1-sol。这不算一轮对话。$/,
-    nothing: /magpie 自动选择的代搜模型 grok\/grok-4\.3 未能为 Codex 的 zai\/glm-5\.2 搜索：回复中未列出搜到的网页。/,
-    notSearched: /magpie 自动选择的代搜模型 grok\/grok-4\.3 未能为 Codex 的 zai\/glm-5\.2 搜索：它没有联网搜索就直接回答了，它的账号或套餐可能不支持联网搜索。/,
+    failed: /「设置 › 模型 › 联网搜索」中选定的代搜模型 grok\/grok-4\.3 未能为 Codex 的 zai\/glm-5\.2 搜索（502 upstream closed）。magpie 改用下一个可用的代搜模型 codex\/gpt-6\.1-sol 继续搜索。\s*这不计为一轮对话。$/,
+    nothing: /magpie 自动选择的代搜模型 grok\/grok-4\.3 未能为 Codex 的 zai\/glm-5\.2 搜索（回复中没有列出搜到的网页）。/,
+    notSearched: /magpie 自动选择的代搜模型 grok\/grok-4\.3 未能为 Codex 的 zai\/glm-5\.2 搜索（它没有联网搜索就直接回答了，它的账号或套餐可能不支持联网搜索）。/,
   },
   "zh-TW": {
     failed: /grok\/grok-4\.3 是在 設定 › 模型 › 聯網搜尋 裡選的代搜模型，但它沒能為 Codex 的 zai\/glm-5\.2 搜尋：502 upstream closed。所以 magpie 改讓下一個可用的代搜模型 codex\/gpt-6\.1-sol 來搜。不屬於對話輪次。$/,

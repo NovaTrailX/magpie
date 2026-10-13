@@ -34,7 +34,7 @@ const words = {
     rulesWait: "The rules wait while you pick the model by hand.", group: "Model every request goes to",
     saved: "Hand: every request to luna" },
   zh: { edit: "编辑", save: "保存", routing: "路由", manual: "手动", smart: "智能",
-    hint: "手动：所有请求都发往你在路由组卡片上选定的模型，并按其供应商的设置在账号或密钥间路由。其他模型和规则暂不生效；所选模型失败时也不会切换。",
+    hint: "手动模式下，所有请求都会发往你在路由组卡片上选定的模型，并按其供应商设置在账号或密钥间路由。选择其他模型前，其余模型和规则都不会生效。所选模型失败时也不会切换。",
     rulesWait: "手动选择模型时，规则暂不生效。", group: "所有请求发往的模型",
     saved: "Hand：所有请求改发给 luna" },
 };

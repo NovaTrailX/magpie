@@ -59,8 +59,8 @@ const words = {
   },
   zh: {
     container: "在容器中运行",
-    opened: "打开本页所用的地址，端口为网关端口；可用 MAGPIE_PUBLIC_URL 另设",
-    own: "容器自身的地址，其他设备无法访问：请将 MAGPIE_PUBLIC_URL 设为宿主机地址",
+    opened: "这是打开本页时使用的地址，端口为网关端口。也可以通过 MAGPIE_PUBLIC_URL 设置其他地址。",
+    own: "容器自身的地址无法从其他设备访问。请将 MAGPIE_PUBLIC_URL 设为宿主机地址。",
   },
 };
 

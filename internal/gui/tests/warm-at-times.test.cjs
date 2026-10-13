@@ -50,7 +50,7 @@ function serve(lang, posts) {
 
 const W = {
   en: { one: "Starts each account's 5-hour window at this time every day", many: "Starts each account's 5-hour window at each of these times every day", add: "Add a time", rm: "Remove 15:05", off: "Off" },
-  zh: { one: "每天到这个时间开启各账号的 5 小时窗口", many: "每天到其中每个时间开启各账号的 5 小时窗口", add: "添加一个时间", rm: "删除 15:05", off: "关闭" },
+  zh: { one: "每天到这个时间，为每个账号开启 5 小时窗口。", many: "每天到所设的每个时间，分别为各账号开启 5 小时窗口。", add: "添加一个时间", rm: "删除 15:05", off: "关闭" },
   ja: { one: "毎日この時刻に各アカウントの 5 時間枠を開始します", many: "毎日これらの各時刻に各アカウントの 5 時間枠を開始します", add: "時刻を追加", rm: "15:05 を削除", off: "オフ" },
   de: { one: "Startet das 5-Stunden-Zeitfenster jedes Kontos täglich zu dieser Uhrzeit", many: "Startet das 5-Stunden-Zeitfenster jedes Kontos täglich zu jeder dieser Uhrzeiten", add: "Uhrzeit hinzufügen", rm: "15:05 entfernen", off: "Aus" },
 };

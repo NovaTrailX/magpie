@@ -21,9 +21,9 @@ const words = {
     settings: "Requests to vendors without a proxy of their own, and update checks, go through http://127.0.0.1:7890",
   },
   zh: {
-    off: "已关闭：未单独设置代理的模型厂商请求和检查更新都直连",
-    none: "未发现系统代理，未单独设置代理的模型厂商请求和检查更新都直连",
-    settings: "未单独设置代理的模型厂商请求和检查更新都经由 http://127.0.0.1:7890",
+    off: "已关闭。未单独设置代理的模型厂商请求和检查更新都会直连。",
+    none: "未发现系统代理。未单独设置代理的模型厂商请求和检查更新都会直连。",
+    settings: "未单独设置代理的模型厂商请求和检查更新都会经由 http://127.0.0.1:7890。",
   },
   "zh-TW": {
     off: "已關閉：未單獨設定代理的模型廠商請求和檢查更新都直連",

@@ -84,7 +84,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             badges: n.querySelectorAll(".badge").length, tiles: n.querySelectorAll(".dep-ic, svg").length, primary: n.querySelectorAll(".primary").length,
             dot: dot ? getComputedStyle(dot).backgroundColor : null, amber: getComputedStyle(document.body).getPropertyValue("--amber").trim(),
             head: { top: head.top, bottom: head.bottom, right: head.right }, box: { left: box.left, right: box.right, top: box.top, bottom: box.bottom }, btns,
-            wide: document.documentElement.scrollWidth > innerWidth, text: n.innerText,
+            wide: document.documentElement.scrollWidth > innerWidth, text: n.innerText, rawText: n.textContent,
           };
         });
         const a = await look();
@@ -96,7 +96,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(a.primary, 0, "a filled primary button in the notice");
         assert(a.dot, "no dot");
         assert(a.text.includes(w.head), a.text);
-        if (lang === "zh") assert(!/。 /.test(a.text), "a space after a Chinese full stop");
+        if (lang === "zh") assert(!/。 /.test(a.rawText), "a space after a Chinese full stop");
         assert.deepEqual(a.btns.map((b) => b.text), [w.later, w.look]);
         for (const b of a.btns) assert(b.h <= 30 && b.bottom <= a.box.bottom && b.right <= a.box.right, `${b.text} wraps or spills: ${JSON.stringify(b)}`);
         // side by side on the right, beside the text

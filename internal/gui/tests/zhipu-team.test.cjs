@@ -54,7 +54,7 @@ function serve(lang, posts) {
 
 const words = {
   en: { org: "Team org ID", project: "Team project ID", save: "Save", add: "Add", cancel: "Cancel", one: "Team plan: give both the organization ID and the project ID", console: "Zhipu GLM's console" },
-  zh: { org: "团队组织 ID", project: "团队项目 ID", save: "保存", add: "添加", cancel: "取消", one: "团队套餐：请同时填写组织 ID 和项目 ID", console: "Zhipu GLM 控制台" },
+  zh: { org: "团队组织 ID", project: "团队项目 ID", save: "保存", add: "添加", cancel: "取消", one: "团队套餐需要同时填写组织 ID 和项目 ID", console: "Zhipu GLM 控制台" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {

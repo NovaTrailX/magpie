@@ -50,7 +50,7 @@ const words = {
   en: { name: "Reset reminder", off: "Off", h: (n) => `${n} h before`, cny: "¥ CNY",
     sub: "A notification this long before a weekly or monthly window renews with under 85% of it used, or before unused resets expire" },
   zh: { name: "重置前提醒", off: "关闭", h: (n) => `提前 ${n} 小时`, cny: "¥ 人民币",
-    sub: "每周或每月窗口用量不到 85% 即将重置时，或重置卡将过期未用时，提前这么久通知" },
+    sub: "每周或每月额度用量低于 85% 且即将重置时，会提前这么久发送通知。\n重置卡即将过期且尚未使用时也会通知。" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {

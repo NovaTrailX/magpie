@@ -86,8 +86,8 @@ const words = {
   },
   zh: {
     label: "Skills 启用方式", links: "符号链接", copies: "副本", byAgent: "按 Agent", byAgentOne: "按 Agent（1）",
-    linkNote: "符号链接跟着资源库里的 Skill 走：一更新，各 Agent 立刻就用上。",
-    copyNote: "每个 Agent 都有自己的副本；资源库中的 Skill 更新时会重新生成副本，副本中的修改会被覆盖。",
+    linkNote: "Agent 通过符号链接使用资源库中的 Skill，资源库更新后会立即生效。",
+    copyNote: "每个 Agent 都有自己的副本。资源库中的 Skill 更新后会重新生成副本，副本里的修改会被覆盖。",
     copied: "现在各 Agent 拿到的是 Skills 的副本", behind: "副本已落后", behindTip: "Codex 中的副本与资源库中的 Skill 不一致。点击即可重新复制。",
     synced: "副本已更新", sheet: "各 Agent 的 Skills 启用方式", libWay: "跟随资源库", only: "只能用副本", getsCopies: "用副本", getsLinks: "用符号链接",
     codexLinks: "Codex 现在用的是符号链接",

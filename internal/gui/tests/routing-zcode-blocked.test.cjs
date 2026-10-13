@@ -57,7 +57,7 @@ function serve(lang) {
 
 const want = {
   en: { said: "It said: " + vendor, hint },
-  zh: { said: "原话：" + vendor, hint: "ZCode 体验套餐仍拒绝了此请求（已按 ZCode 客户端方式发送）；可能是此 IP 被网络拦截，或 ZCode 新增了校验。请改用有 GLM Coding Plan 的账号，或在此分组中加入其他供应商" },
+  zh: { said: "原话：" + vendor, hint: "即使 magpie 按 ZCode 应用的方式发送请求，ZCode Start Plan 仍会拒绝该请求。\n原因可能是当前 IP 被网络屏蔽，也可能是 ZCode 正在进行新的检查。\n请使用有 GLM Coding Plan 的账号，或在此路由组中添加其他供应商。" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {

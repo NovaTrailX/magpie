@@ -45,9 +45,9 @@ const L = {
     note: /^Qoder has no public API for this/, anyway: "Sign in anyway",
   },
   zh: {
-    global: "Qoder 国际版", globalTitle: /^Qoder 国际版 \(qoder\.com\) 订阅 · Pro\n适用于 qoder\.com（国际站）的账号。$/,
-    cnTitle: /^Qoder CN 订阅 · Pro\n适用于 qoder\.cn 的账号：阿里云账号 \/ 手机号登录。$/,
-    risk: "Qoder CN 账号可能被封禁", hint: "适用于 qoder.cn 的账号：阿里云账号 / 手机号登录。",
+    global: "Qoder 国际版", globalTitle: /^Qoder 国际版 \(qoder\.com\) 订阅 · Pro\n适用于 qoder\.com 国际站的账号。$/,
+    cnTitle: /^Qoder CN 订阅 · Pro\n适用于 qoder\.cn 的账号，可用阿里云账号或手机号登录。$/,
+    risk: "Qoder CN 账号可能被封禁", hint: "适用于 qoder.cn 的账号，可用阿里云账号或手机号登录。",
     note: /^Qoder 没有/, anyway: "仍然登录",
   },
 };

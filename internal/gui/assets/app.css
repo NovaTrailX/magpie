@@ -3831,3 +3831,23 @@ input[type="checkbox"]:disabled { opacity: .45; }
 
 /* a disabled model's pattern, as typed (#1867): an id or a glob */
 .disabled-model .name { font-family: var(--code); font-size: 12px; overflow-wrap: anywhere; }
+
+/* 中文解释按信息单元主动分行，避免换行被单行摘要样式吞掉。 */
+html[lang="zh-CN"] :is(.row.pref .sub, .editor .hint, .signing .s, .ag-install-note,
+  .ag-menu-cap > span:last-child, .pq-anote, .key-limit-ed > .hint,
+  .move .dep-note > span:last-child, .proto-menu .pm-note, .lib-confirm,
+  .lib-skillhow .note, .lib-intro, .lib-aside, .lib-rtk-note,
+  .rt-mode, .rt-steps li:not(.said), .ctx-tune-why, .pop.explained li .n,
+  .ag-lead p, .warnbox, .sub.old.err, .sub.err.image-gen-missing,
+  .rule-row .sub, .txt small, .usage-note.sm-gw-note, .pm-introtext p,
+  .pm-note.warn > span, .pm-sechead > span) { white-space: pre-line; }
+/* 多行提示浮起显示，保留换行并限制高度，不挤动页脚上方的内容。 */
+body .status.lift.multiline { width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 48px);
+  box-sizing: border-box; padding: 10px 12px; border-radius: 10px; line-height: 1.5;
+  white-space: pre-line; overflow: auto; overflow-wrap: anywhere; user-select: text; -webkit-user-select: text; }
+/* 窄窗口把设置控件放到下一行，给中文说明留足横向空间。 */
+@media (max-width: 600px) {
+  .row.pref { flex-wrap: wrap; row-gap: 8px; }
+  .row.pref > .who { flex-basis: 100%; }
+  .row.pref > .val { margin-left: auto; max-width: 100%; }
+}

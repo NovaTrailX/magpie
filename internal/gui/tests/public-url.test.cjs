@@ -41,7 +41,7 @@ const words = {
     remote: "Local network · an enabled gateway key is required",
   },
   zh: {
-    loopback: "仅限本机回环 · 密钥可以随意填",
+    loopback: "仅限本机回环访问 · 密钥可填任意值",
     remote: "局域网接入需要已启用的网关密钥",
   },
 };

@@ -58,6 +58,13 @@ for (const engine of process.env.BROWSER ? [process.env.BROWSER] : ["chromium", 
         assert.equal(await box.count(), 1, selector);
         assert.equal(await box.locator("xpath=ancestor::*[contains(@class,'has-help')][1]").locator(".help-mark").count(), 1, selector);
       }
+      if (lang === "zh") {
+        const notes = await page.locator(".editor input.concurrency, .editor input.rpm, .editor input.queue-limit, .editor input.queue-wait, .editor input.price-rate").evaluateAll((boxes) => boxes.map((box) => box.closest(".has-help").querySelector('[role="tooltip"]').textContent));
+        for (const note of notes) {
+          assert(note.endsWith("。"), "同页的完整字段说明以句号结尾");
+          assert(!/[；;]/.test(note), "限流说明不再用分号串接规则");
+        }
+      }
       const widths = await page.locator(".editor input.concurrency, .editor input.rpm, .editor input.queue-limit, .editor input.queue-wait, .editor input.price-rate").evaluateAll((boxes) => boxes.map((box) => box.getBoundingClientRect().width));
       assert(Math.max(...widths) - Math.min(...widths) < 1, "numeric provider fields have the same width");
       // 点击标签仍聚焦原控件；真实 Tab 顺序可到达说明标记。
@@ -84,6 +91,32 @@ for (const engine of process.env.BROWSER ? [process.env.BROWSER] : ["chromium", 
       assert.deepEqual(await input.boundingBox(), before, "help does not move the field");
       await page.mouse.move(1, 1);
       await pop.waitFor({ state: "detached" });
+
+      if (lang === "zh") {
+        const compact = page.locator(".editor input.compacts");
+        const compactWrap = compact.locator("xpath=ancestor::*[contains(@class,'has-help')][1]");
+        const full = await compactWrap.locator('[role="tooltip"]').textContent();
+        assert(full.includes("\n"), "压缩阈值的操作与默认规则分行说明");
+        await expect(compact).toHaveAccessibleDescription(full.replace(/\s+/g, " ").trim());
+        await compactWrap.locator(".help-mark").focus();
+        await pop.waitFor();
+        assert.equal(await pop.textContent(), full, "浮层保留说明中的主动换行");
+        const rows = await pop.evaluate((box) => {
+          const text = box.firstChild, line = text.textContent.indexOf("\n") + 1;
+          const range = document.createRange();
+          range.setStart(text, 0); range.setEnd(text, 1);
+          const first = range.getBoundingClientRect().top;
+          range.setStart(text, line); range.setEnd(text, line + 1);
+          return { first, next: range.getBoundingClientRect().top };
+        });
+        assert(rows.next > rows.first, "主动换行在页面中实际显示为下一行");
+        if (process.env.ARTIFACT_DIR && engine === "chromium") {
+          await fs.mkdir(process.env.ARTIFACT_DIR, { recursive: true });
+          await pop.screenshot({ path: path.join(process.env.ARTIFACT_DIR, "chinese-help-lines.png") });
+        }
+        await page.keyboard.press("Escape");
+        await page.keyboard.press("Tab");
+      }
 
       // 窄窗口、长说明与底部锚点都由浮层定位器约束。
       await page.setViewportSize({ width: 360, height: 480 });
@@ -123,6 +156,20 @@ for (const engine of process.env.BROWSER ? [process.env.BROWSER] : ["chromium", 
       await pop.waitFor();
       await custom.evaluate((e) => e.remove());
       await pop.waitFor({ state: "detached" });
+      if (lang === "zh") {
+        await page.keyboard.press("Escape");
+        await page.locator(".editor").waitFor({ state: "detached" });
+        const layout = await page.locator("#view-providers").boundingBox();
+        await page.evaluate(() => status(withNotice(t("Saved"), "Cline reads its provider as a session starts — open sessions keep the model they have; new ones use this. Reload VS Code's window for its extension."), "warn", 15000));
+        const notice = page.locator("#status");
+        assert((await notice.textContent()).includes("\n"), "真实登录提示按操作分行");
+        assert(await notice.evaluate((e) => e.classList.contains("lift")), "没有弹窗时，多行状态仍浮起显示");
+        assert.equal(await notice.innerText(), await notice.textContent(), "状态栏保留登录提示的换行");
+        const bounds = await notice.boundingBox();
+        assert(bounds.x >= 0 && bounds.x + bounds.width <= 360, "多行提示不超出窄窗口");
+        assert(bounds.y >= 0 && bounds.y + bounds.height <= 480, "多行提示不超出短窗口");
+        assert.deepEqual(await page.locator("#view-providers").boundingBox(), layout, "多行提示不挤动页面布局");
+      }
       assert.deepEqual(errors, []);
       assert.deepEqual(posts, [], "reading help makes no API writes");
     });

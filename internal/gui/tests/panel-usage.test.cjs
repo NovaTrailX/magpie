@@ -148,7 +148,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await p.locator('[data-ptab="stats"]').click();
       await p.locator("#panelUsage .pu-tot").waitFor();
       assert(await p.locator("#panelUsage").isVisible());
-      assert.equal(await p.locator("#panelUsage > .usage-note").textContent(), lang === "zh" ? "统计网关调用与会话日志调用；本地拒绝的请求不计入汇总。" : "Gateway and session-log calls; local rejections excluded from totals.");
+      assert.equal(await p.locator("#panelUsage > .usage-note").textContent(), lang === "zh" ? "统计网关调用和会话日志调用。本地拒绝的请求不计入汇总。" : "Gateway and session-log calls; local rejections excluded from totals.");
       // read again on asking (#546), and as the panel is opened again
       const refresh = p.locator("#panelUsage .pu-again");
       assert.equal(await refresh.getAttribute("aria-label"), lang === "zh" ? "立即刷新" : "Refresh now");

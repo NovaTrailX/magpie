@@ -43,7 +43,7 @@ const words = {
     google: "Antigravity search for their own models first, with Gemini's Google Search",
     more: "A1, A2, A3, A4, A5 and 3 more." },
   zh: { name: "代搜供应商", off: "关闭", auto: "自动", small: "GPT-5 Mini Named（它的小模型）", unused: "没有用 OpenAI · GPT-5 Mini Named：它已关闭",
-    own: "Kimi Code 套餐（Kimi Code）的模型优先用套餐自带的联网搜索；其他模型仅在此处选中时使用", web: "它自带的联网搜索",
+    own: "Kimi Code 套餐（Kimi Code）的模型优先使用套餐自带的联网搜索。\n只有在此处选中该套餐时，才用它为其他模型代搜。", web: "它自带的联网搜索",
     google: "Antigravity 的模型优先用 Gemini 自带的 Google 搜索",
     more: "A1, A2, A3, A4, A5 以及另外 3 个。" },
 };
@@ -54,7 +54,7 @@ const helpWords = {
     left: "These providers can't be selected to search for other models with the current configuration: MiniMax, Kimi For Coding. Their models can still get search results through other available search providers or configured search APIs.",
   },
   zh: {
-    help: "当模型无法直接联网搜索时，由所选供应商代为搜索并返回结果。代搜可能消耗所用服务的额度或产生费用；magpie 自动选择的供应商失败时会尝试其他可用来源，但在此手动选中的供应商不会被换成其他供应商，只会改用你配置的搜索 API。",
+    help: "模型无法直接联网搜索时，由所选供应商代为搜索并返回结果。\n搜索可能消耗该服务的额度或产生费用。\n若 magpie 自动选择的供应商失败，会尝试其他可用来源。\n手动选择的供应商不会被其他供应商替换，只会改用你配置的搜索 API。",
     relays: "以下中转服务需手动指定，不参与自动选择或自动回退：MyRelay。",
     left: "以下供应商在当前配置下不可选为代搜供应商：MiniMax, Kimi For Coding。它们的模型仍可通过其他可用的代搜供应商或已配置的搜索 API 获取搜索结果。",
   },
@@ -106,8 +106,8 @@ function serve(lang, posted, st) {
 const failedWords = {
   en: { notSearched: /^GPT Five Five · OpenAI didn't search .+: it answered without searching the web, so its account or plan may not offer web search\. No other provider searched in its place; pick Automatic or another provider, or add a Search API\.$/,
     error: /^GPT Five Five · OpenAI didn't search .+: 400 search quota used up\. No other provider/ },
-  zh: { notSearched: /^GPT Five Five · OpenAI .+没能搜索：它没有联网搜索就直接回答了，它的账号或套餐可能不支持联网搜索。没有换用其他供应商代搜；可改选“自动”或其他供应商，或添加搜索 API。$/,
-    error: /^GPT Five Five · OpenAI .+没能搜索：400 search quota used up。/ },
+  zh: { notSearched: /^GPT Five Five · OpenAI .+没能搜索（它没有联网搜索就直接回答了，它的账号或套餐可能不支持联网搜索）。magpie 没有改用其他供应商代搜。可选择「自动」或其他供应商，也可以添加搜索 API。$/,
+    error: /^GPT Five Five · OpenAI .+没能搜索（400 search quota used up）。/ },
   "zh-TW": { notSearched: /^GPT Five Five · OpenAI .+沒能搜尋：它沒有聯網搜尋就直接回答了，它的帳號或方案可能不支援聯網搜尋。沒有換用其他供應商代搜；可改選「自動」或其他供應商，或新增搜尋 API。$/,
     error: /^GPT Five Five · OpenAI .+沒能搜尋：400 search quota used up。/ },
   ja: { notSearched: /^GPT Five Five · OpenAI は.+、検索できませんでした：ウェブ検索をせずに回答しました。アカウントやプランがウェブ検索に対応していない可能性があります。他のプロバイダが代わりに検索することはありません。「自動」か別のプロバイダを選ぶか、検索 API を追加してください。$/,
@@ -306,7 +306,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(await row.locator(".searcher-own, .searcher-unused, .searcher-relays, .searcher-left-out").count(), 0);
       assert.equal(await page.locator("#searchFirstRow").count(), 0);
       assert.equal(await row.locator(".sub").innerText(), lang === "zh"
-        ? "关闭供应商代搜后，仅使用已配置的搜索 API；如果没有配置搜索 API，magpie 不会添加搜索工具。供应商自带的联网搜索不受影响。"
+        ? "关闭供应商代搜后，只使用已配置的搜索 API。\n如果没有配置搜索 API，magpie 不会添加搜索工具。\n供应商自带的联网搜索不受影响。"
         : "When provider search is off, only configured Search APIs are used. Without a Search API, magpie does not add a search tool. Providers' native web search is unchanged.");
 
       // back to Automatic
@@ -365,7 +365,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert(layout.clipped <= 1 && layout.fits, JSON.stringify(layout));
           const sub = row.locator(".sub");
           assert.equal(await sub.getAttribute("class"), "sub", "copy changes must not opt into wrapping");
-          if (width === 1000) {
+          if (lang === "zh") {
+            assert.equal(layout.whiteSpace, "pre-line", "中文长说明保留主动换行");
+            assert(layout.overflow <= 1, "中文说明不横向截断");
+            assert.equal(await sub.innerText(), await sub.textContent(), "中文说明完整显示");
+          } else if (width === 1000) {
             assert.equal(layout.whiteSpace, "nowrap", "desktop help stays on one line");
             assert.equal(layout.textOverflow, "ellipsis");
             assert(layout.overflow > 0, "long help is truncated");

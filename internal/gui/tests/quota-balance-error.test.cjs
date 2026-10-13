@@ -44,7 +44,7 @@ function serve(lang) {
 
 const words = {
   en: "ClinePass limits couldn't be read — hover for why",
-  zh: "ClinePass 额度没能读到 — 悬停查看原因",
+  zh: "无法读取 ClinePass 额度。悬停可查看原因。",
   "zh-TW": "ClinePass 額度沒能讀到 — 懸停查看原因",
   ja: "ClinePass の上限を読み取れませんでした — ホバーで理由を表示",
   de: "ClinePass-Limits konnten nicht gelesen werden — für den Grund darüberfahren",

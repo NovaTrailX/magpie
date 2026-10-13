@@ -62,7 +62,7 @@ function serve(lang, lifted) {
 
 const want = {
   en: { label: "account restricted by the vendor", why: "only the vendor lifting the restriction brings it back. Appeal with the vendor", hint, lift: "The restriction is lifted — try it again" },
-  zh: { label: "账号被服务商限制", why: "只有服务商解除限制才能让它恢复。请向服务商申诉", hint: "WorkBuddy 因异常行为限制了这个账号；在 WorkBuddy 解除之前它不会再被使用，可在 WorkBuddy 中提交反馈申诉", lift: "限制已解除，重新使用" },
+  zh: { label: "账号被服务商限制", why: "需要供应商解除限制才能恢复。可向供应商申诉", hint: "WorkBuddy 因异常活动限制了此账号。\n在 WorkBuddy 解除限制前暂停使用，可在 WorkBuddy 中「提交反馈」申诉。", lift: "限制已解除，重新使用" },
   "zh-TW": { label: "帳號被服務商限制", why: "只有服務商解除限制才能讓它恢復。請向服務商申訴", hint: "WorkBuddy 因異常行為限制了這個帳號；在 WorkBuddy 解除之前它不會再被使用，可在 WorkBuddy 中提交回饋申訴", lift: "限制已解除，重新使用" },
   ja: { label: "ベンダーがアカウントを制限", why: "制限を解除できるのはベンダーだけなので", hint: "WorkBuddy が不審なアクティビティを理由にこのアカウントを制限しました。WorkBuddy が解除するまで使われません。解除は WorkBuddy のフィードバック送信から申し立てられます", lift: "制限が解除された — もう一度試す" },
   de: { label: "Konto vom Anbieter gesperrt", why: "denn nur die Aufhebung der Sperre durch den Anbieter bringt es zurück. Legen Sie beim Anbieter Einspruch ein", hint: "WorkBuddy hat dieses Konto wegen ungewöhnlicher Aktivität gesperrt; es bleibt außen vor, bis WorkBuddy die Sperre aufhebt, was ein Einspruch (Feedback senden in WorkBuddy) beantragt", lift: "Die Sperre ist aufgehoben – erneut versuchen" },

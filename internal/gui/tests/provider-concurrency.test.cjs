@@ -54,7 +54,7 @@ function serve(lang, posts) {
 
 const words = {
   en: { label: "Concurrency", save: "Save", none: "No limit", plugin: "4, as its plugin says", hint: "Over it, requests queue and go out in order; 0 or empty is no limit", bad: "Concurrency: a whole number from 0 to 1000" },
-  zh: { label: "并发上限", save: "保存", none: "不限", plugin: "4（插件的默认值）", hint: "超出时排队，按顺序发出；0 或留空为不限制", bad: "并发上限：请填写 0 到 1000 之间的整数" },
+  zh: { label: "并发上限", save: "保存", none: "不限", plugin: "4（插件的默认值）", hint: "达到并发上限后，后续请求会排队并按顺序发送。\n填 0 或留空表示不限。", bad: "并发上限：请填写 0 到 1000 之间的整数" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {

@@ -164,7 +164,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // the two switches, and the ranking by the most tokens: Claude, Relay, Codex
         assert.deepEqual(await p.locator("#ledMetric .opt").allTextContents(), w.metric);
         assert.deepEqual(await p.locator("#ledSplit .opt").allTextContents(), w.split);
-        assert.equal(await p.locator("#ledScope").textContent(), lang === "zh" ? "统计网关调用与会话日志调用；本地拒绝的请求不计入汇总。" : "Gateway and session-log calls; local rejections excluded from totals.");
+        assert.equal(await p.locator("#ledScope").textContent(), lang === "zh" ? "统计网关调用和会话日志调用。本地拒绝的请求不计入汇总。" : "Gateway and session-log calls; local rejections excluded from totals.");
         assert.equal(await p.locator("#ledMetric .opt.on").textContent(), w.metric[0]);
         assert.equal(await p.locator("#ledSplit .opt.on").textContent(), w.split[0]);
         assert.equal(await p.locator("#period .opt.on").textContent(), lang === "zh" ? "今天" : "Today");

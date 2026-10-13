@@ -76,8 +76,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(await row("model-1").getByRole("textbox", { name: L.input, exact: true }).count(), 1);
       assert.equal(await row("model-1").locator("select").count(), 0);
       // whose list price it is: models.dev's, or the other magpie's
-      assert.match(await row("model-1").locator(".mprice").getAttribute("title"), zh ? /留空则使用官方标价/ : /empty: its list price/);
-      assert.match(await row("model-4").locator(".mprice").getAttribute("title"), zh ? /留空则使用另一台 magpie 的计价/ : /empty: what the other magpie counts it at/);
+      assert.match(await row("model-1").locator(".mprice").getAttribute("title"), zh ? /留空时使用官方标价/ : /empty: its list price/);
+      assert.match(await row("model-4").locator(".mprice").getAttribute("title"), zh ? /留空时使用另一台 magpie 的计价/ : /empty: what the other magpie counts it at/);
 
       // a part typed, the others the list's; Restore default drops a price
       const y = await page.evaluate(() => scrollY);

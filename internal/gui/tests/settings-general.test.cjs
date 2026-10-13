@@ -77,7 +77,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           bare: bare.map((sel) => { const r = row(sel); return [sel, !r ? "missing" : r.hidden ? "hidden" : [...r.querySelectorAll(".sub")].filter((s) => s.getClientRects().length && s.textContent.trim()).map((s) => s.textContent)]; }),
           kept: kept.map((sel) => {
             const r = row(sel), s = r?.querySelector(".sub");
-            return [sel, !r || r.hidden ? "missing" : !s ? "no line" : { text: s.textContent, lines: Math.round(s.getBoundingClientRect().height / parseFloat(getComputedStyle(s).lineHeight || 16)), cut: s.scrollWidth > s.clientWidth + 1 }];
+            return [sel, !r || r.hidden ? "missing" : !s ? "no line" : { text: s.textContent, shown: s.innerText, lines: Math.round(s.getBoundingClientRect().height / parseFloat(getComputedStyle(s).lineHeight || 16)), cut: s.scrollWidth > s.clientWidth + 1 }];
           }),
           stripes: [...document.querySelectorAll("#setPage-general .row")].filter((r) => parseFloat(getComputedStyle(r).borderLeftWidth) > 1).length,
           sideways: document.documentElement.scrollWidth > innerWidth,
@@ -86,8 +86,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       for (const [sel, subs] of rows.bare) assert.deepEqual(subs, [], `${sel}'s row says its name alone`);
       for (const [sel, sub] of rows.kept) {
         assert.equal(typeof sub, "object", `${sel}: ${sub}`);
-        assert.ok(sub.text.trim() && sub.lines <= 1, `${sel}: ${JSON.stringify(sub)}`);
-        if (width === 1000) assert.equal(sub.cut, false, `${sel}'s line is cut short: ${sub.text}`);
+        if (lang === "zh") {
+          assert.equal(sub.shown, sub.text, `${sel} 的说明完整显示，并保留主动换行`);
+          assert.ok(sub.text.trim() && sub.lines <= 4, `${sel}: ${JSON.stringify(sub)}`);
+          assert.equal(sub.cut, false, `${sel} 的中文说明不截断`);
+        } else {
+          assert.ok(sub.text.trim() && sub.lines <= 1, `${sel}: ${JSON.stringify(sub)}`);
+          if (width === 1000) assert.equal(sub.cut, false, `${sel}'s line is cut short: ${sub.text}`);
+        }
       }
       assert.equal(rows.stripes, 0, "a row has a stripe down its left");
       assert.equal(rows.sideways, false, "the page scrolls sideways");
@@ -103,6 +109,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // the page drawn in another language grows above it (the view scrolls
       // to hold it, as every click on Settings does)
       const where = () => pick.evaluate((b) => { const v = document.querySelector("#view-settings"); return { top: b.getBoundingClientRect().top, inPage: b.getBoundingClientRect().top - b.closest(".set-page, section, [id^=setPage-]").getBoundingClientRect().top, scrolled: v.scrollTop }; });
+      await page.waitForFunction(() => !document.querySelector("#view-settings").getAnimations({ subtree: true }).some((a) => a.playState === "running" && isFinite(a.effect.getComputedTiming().endTime)));
       const before = await where();
       const b = await pick.boundingBox();
       await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
@@ -125,6 +132,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       for (let i = 0; i < 50 && (await head.innerText()) !== appearance[to]; i++) await page.waitForTimeout(50);
       assert.equal(await head.innerText(), appearance[to]);
       assert.equal(await page.locator(".proto-menu").count(), 0, "the menu stays open");
+      await page.waitForFunction(() => !document.querySelector("#view-settings").getAnimations({ subtree: true }).some((a) => a.playState === "running" && isFinite(a.effect.getComputedTiming().endTime)));
       const after = await where();
       assert.ok(Math.abs(after.inPage - before.inPage) <= 1, `the rows above the language moved: ${JSON.stringify([before, after])}`);
       // a view at its top can't scroll up to hold it as the header above shrinks
