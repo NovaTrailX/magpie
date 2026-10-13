@@ -687,6 +687,8 @@ function renderAgents() {
     list.append(more, fold);
   }
 
+  agentsManageButton(list);
+  confirmAsk?.refreshAgents?.();
   paintUpdateAll();
   paintInstalls();
   renderProfiles();
@@ -998,7 +1000,7 @@ function connectable(a) {
 }
 
 // PICKS_IN is where an agent picks a model itself, for the words under it.
-const PICKS_IN = { codex: "/model", claude: "/model", opencode: "/models", pi: "/model", droid: "/model", kimi: "/model", grok: "/model", "minimax-code": "/model", dsh: "/model", crush: "ctrl+p", omp: "/model", qwen: "/model", mimocode: "/model" };
+const PICKS_IN = { codex: "/model", claude: "/model", opencode: "/models", pi: "/model", droid: "/model", kimi: "/model", grok: "/model", "minimax-code": "/model", dsh: "/model", crush: "ctrl+p", omp: "/model", qwen: "/model", mimocode: "/model", deveco: "/models" };
 
 function connectSaid(a) {
   if (!a.wired) return t("Not connected · {agent} uses its own settings", { agent: a.name });
@@ -1221,7 +1223,7 @@ function connectLine(a, kind) {
     // line says why, and the accounts that turn it off are a click away
     else if (a.failover) {
       say(t("Not connected · goes through magpie only to fail over to your other ChatGPT accounts"));
-      words.title = t("magpie set openai_base_url in {agent}'s config.toml, so a request the ChatGPT account {agent} is signed in to has no allowance for goes on to your other ChatGPT accounts on in magpie. {agent} keeps to its own models. To stop it, switch those accounts off under Providers › Codex; connecting {agent} adds magpie's models.", { agent: a.name });
+      words.title = t("magpie set openai_base_url in {agent}'s config.toml, so a request the ChatGPT account {agent} is signed in to has no allowance for goes on to your other ChatGPT accounts on in magpie. {agent} keeps to its own models. To stop it, tick Only switch {agent}'s sign-in under Providers › Codex, or switch those accounts off; connecting {agent} adds magpie's models.", { agent: a.name });
       const go = el("button", "ag-acc", t("ChatGPT accounts"));
       go.type = "button";
       go.title = words.title;
@@ -2466,6 +2468,140 @@ async function saveArrangement(order, hidden, shown) {
   }
 }
 
+// Bulk visibility changes only magpie's arrangement, never agent configs.
+let agentsVisibilitySaving = false;
+// Ignore state reads begun before a completed visibility write. A fresh read
+// still owns the truth, including changes made by the tray or another window.
+let agentsVisibilityRevision = 0;
+function agentsManageButton(list) {
+  if (mode === "panel" || !state.agents.length) return;
+  let bar = $("#agentsManage");
+  if (!bar) {
+    bar = el("div", "ag-manage-bar");
+    bar.id = "agentsManage";
+    const more = list.querySelector(":scope > .agent-more");
+    if (more) { more.before(bar); bar.append(more); }
+    else list.append(bar);
+    const button = el("button", "ag-manage-button");
+    button.type = "button";
+    button.append(svg("M2 3.5h2M6 3.5h8M2 8h2M6 8h8M2 12.5h2M6 12.5h8", 14, 1.5), el("span", "", t("Manage")));
+    button.setAttribute("aria-label", t("Manage agents"));
+    button.title = t("Manage agents");
+    button.onclick = openAgentsManager;
+    bar.append(button);
+  }
+  bar.querySelector(".ag-manage-button").disabled = agentsVisibilitySaving;
+}
+
+function openAgentsManager() {
+  if (agentsVisibilitySaving) return;
+  const selected = new Set();
+  const ed = el("div", "editor ag-manager");
+  const head = el("div", "ehead");
+  head.append(el("b", "", t("Manage agents")));
+  const note = el("p", "lib-confirm", t("Hiding only changes this list, not an agent's connection or settings. Unhidden agents may stay under Not set up."));
+  const search = el("input", "words ag-manage-search");
+  search.type = "search";
+  search.placeholder = t("Search agents…");
+  search.setAttribute("aria-label", t("Search agents…"));
+  const actions = el("div", "ag-manage-actions");
+  const rows = el("div", "ag-manage-rows");
+  const count = el("span", "ag-manage-count");
+  const result = el("p", "ag-manage-result");
+  result.setAttribute("role", "status");
+  const bar = el("div", "bar");
+  const button = (label, run, parent = actions) => {
+    const b = el("button", "text", t(label));
+    b.type = "button";
+    b.onclick = run;
+    parent.append(b);
+    return b;
+  };
+  const matching = () => arrangeAgents().all.filter((a) =>
+    (a.name + " " + a.id).toLocaleLowerCase().includes(search.value.trim().toLocaleLowerCase()));
+  button("Select search results", () => { matching().forEach((a) => selected.add(a.id)); draw(); });
+  button("Invert search selection", () => { matching().forEach((a) => selected.has(a.id) ? selected.delete(a.id) : selected.add(a.id)); draw(); });
+  button("Select unconnected agents", () => {
+    selected.clear();
+    matching().filter((a) => !onMagpie(a)).forEach((a) => selected.add(a.id));
+    draw();
+  });
+  button("Clear selection", () => { selected.clear(); draw(); });
+  const hide = button("Hide selected", () => save(true), bar);
+  const show = button("Unhide selected", () => save(false), bar);
+  bar.append(el("span", "grow"));
+  button("Done", () => closeConfirmAsk(), bar);
+  const controls = () => {
+    ed.querySelectorAll("button, input").forEach((b) => { b.disabled = agentsVisibilitySaving; });
+    hide.disabled ||= ![...selected].some((id) => !hiddenIds().includes(id));
+    show.disabled ||= ![...selected].some((id) => hiddenIds().includes(id));
+    count.textContent = t(selected.size === 1 ? "{n} agent selected" : "{n} agents selected", { n: selected.size });
+  };
+  // Update status in place: a state refresh must keep search, selection and
+  // keyboard focus on the control the reader is using.
+  ed.refreshAgents = () => {
+    const hidden = new Set(hiddenIds());
+    for (const row of rows.querySelectorAll(".ag-manage-row")) {
+      row.querySelector(".ag-manage-state").textContent = t(hidden.has(row.dataset.id) ? "Hidden" : "Not hidden");
+    }
+    controls();
+  };
+  function draw() {
+    rows.replaceChildren();
+    for (const a of matching()) {
+      const row = el("label", "ag-manage-row");
+      row.dataset.id = a.id;
+      const check = el("input");
+      check.type = "checkbox";
+      check.checked = selected.has(a.id);
+      check.setAttribute("aria-label", a.name);
+      check.onchange = () => { check.checked ? selected.add(a.id) : selected.delete(a.id); controls(); };
+      row.append(check, icon(a.icon), el("span", "ag-manage-name", a.name), el("span", "ag-manage-state", t(isHidden(a) ? "Hidden" : "Not hidden")));
+      rows.append(row);
+    }
+    if (!rows.children.length) rows.append(el("p", "lib-confirm", t("No matching agents")));
+    controls();
+  }
+  async function save(hidden) {
+    if (agentsVisibilitySaving) return;
+    const ids = [...selected].filter((id) => hiddenIds().includes(id) !== hidden);
+    if (!ids.length) return;
+    const next = new Set(hiddenIds());
+    ids.forEach((id) => hidden ? next.add(id) : next.delete(id));
+    agentsVisibilitySaving = true;
+    controls();
+    result.textContent = "";
+    agentsManageButton($("#agents"));
+    try {
+      // Commit once, then publish only the arrangement returned by the server.
+      // A failed save leaves both the visible list and selection unchanged.
+      const s = await api("agents/arrange", {
+        order: state.settings?.agentOrder || [], hidden: [...next], shown: state.settings?.agentsShown || [],
+      });
+      if (hidden) ids.forEach((id) => unhid.delete(id));
+      agentsVisibilityRevision++;
+      state.settings = { ...state.settings, agentOrder: s.agentOrder || [], agentsHidden: s.agentsHidden || [], agentsShown: s.agentsShown || [] };
+      selected.clear();
+      result.textContent = hidden
+        ? t(ids.length === 1 ? "{n} agent hidden" : "{n} agents hidden", { n: ids.length })
+        : t(ids.length === 1 ? "{n} agent unhidden" : "{n} agents unhidden", { n: ids.length });
+      renderAgents();
+    } catch (e) {
+      result.textContent = e.message;
+    } finally {
+      agentsVisibilitySaving = false;
+      agentsManageButton($("#agents"));
+      draw();
+    }
+  }
+  search.oninput = draw;
+  ed.append(head, note, search, actions, count, rows, result, bar);
+  draw();
+  confirmAsk = ed;
+  openModal(ed);
+  $("#modal").classList.add("lib");
+}
+
 // moveAgent puts the agent at index `to` among the rows in view; the folded
 // ones keep their places after them.
 function moveAgent(id, to) {
@@ -3639,7 +3775,7 @@ async function load(again) {
   if (view === "providers" && !providers) renderProvidersLoading();
   if (view === "gateway" && !providers) renderGatewayLoading();
   try {
-    const since = prefsWrites, hid = hiddenIds().join();
+    const since = prefsWrites, hid = hiddenIds().join(), visibilitySince = agentsVisibilityRevision;
     const asked = api("state");
     // the first load draws the state magpie kept from its last read while
     // the fresh one is read (#1519, fatkun): reading every agent's config,
@@ -3665,6 +3801,10 @@ async function load(again) {
     // a setting changed while this was on its way (it can take seconds):
     // what came back is from before it, and would put the old theme back
     if (!prefsSettled(since) && load.done) next.settings = state.settings;
+    if (visibilitySince !== agentsVisibilityRevision) {
+      const { agentOrder, agentsHidden, agentsShown } = state.settings;
+      next.settings = { ...next.settings, agentOrder, agentsHidden, agentsShown };
+    }
     state = next;
     load.done = true;
     // the library may have drawn itself before the saved language was known
@@ -3680,6 +3820,7 @@ async function load(again) {
     tintTitleBar();
     renderAgents();
     redrawSuffix();
+    redrawNoNames();
     // Update all's outcome stays until the agents are read again
     if (cliAll && cliAll.done >= cliAll.n) cliAll = null;
     paintUpdateAll(true);
@@ -5936,14 +6077,17 @@ function accountPlan(a) {
 // clipboard API is refused inside the app's window; a browser tab on the
 // dev UI falls back to it. A tab on `magpie web` reached over plain http
 // from another computer (a NAS's) has no clipboard API at all, so the
-// older copy command is the last try there.
+// older copy command is the last try there. magpie refuses a copy it
+// couldn't read back (#1881: GTK 3 on KDE Plasma without middle-click
+// paste served it empty), and the page's ways are tried then too. When
+// none copies, the page says so and shows the text to copy by hand.
 async function copy(text, what, btn, message) {
   const done = () => { status(message || t("{what} copied", { what }), "ok"); flashCopied(btn); };
   const res = await fetch("/api/copy", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) }).catch(() => null);
   if (res && res.ok) return done();
   try { await navigator.clipboard.writeText(text); return done(); } catch {}
   if (copyByCommand(text)) return done();
-  status(text);
+  status(t("Couldn't copy. Select it here and copy it yourself: {text}", { text }), "err");
 }
 
 // copyByCommand copies text with the page's copy command, through a
@@ -8060,6 +8204,7 @@ function asTyped() {
   // many keys pasted (361 on Discord) are asked about by the first
   const keys = splitKeys(draft.key || "");
   const body = { typed: true, key: keys.length > 1 ? keys[0] : (draft.key || "").trim(), chat: (draft.chat || "").trim(), responses: (draft.responses || "").trim(), anthropic: (draft.anthropic || "").trim(), gemini: (draft.gemini || "").trim(), modelsURL: (draft.modelsURL || "").trim() };
+  Object.assign(body, movedURLs(draft));
   // a System One base is asked at POST …/systemone, not on the three APIs
   if (draft.api === "decide") body.decide = (draft.decide || "").trim();
   // a Vertex AI provider is asked at the project typed, with the
@@ -9121,6 +9266,42 @@ function drawEditor(p, presetID) {
     ed.append(...field(t("Endpoint"), endpoint, pr.endpointHint ? t(pr.endpointHint) : ""));
   }
 
+  // a server on this machine (Ollama, LM Studio, oMLX, MLX-Serve) can
+  // listen on another port, or be another computer's: its address moves each URL, each API
+  // keeping its path, as provider.AtAddress does
+  let address = null, addressMore = null;
+  if (pr?.kind === "local") {
+    // a saved provider's URLs (or a duplicate's) start it; a new one's are
+    // the preset's, sent as none unless moved, so the gateway takes them
+    const own = draft.chat !== undefined;
+    // oMLX's decision API (#1641) is the same server's, and moves with it
+    draft.addressFrom ??= { chat: draft.chat ?? pr.chat ?? "", responses: draft.responses ?? pr.responses ?? "", anthropic: draft.anthropic ?? pr.anthropic ?? "", decide: draft.decide ?? (p?.decide || pr.decide || "") };
+    draft.addressWas ??= own ? originOf(draft.addressFrom) : "";
+    const from = draft.addressFrom, addressWas = draft.addressWas;
+    draft.address ??= addressWas;
+    address = input(draft.address, originOf(pr));
+    address.inputMode = "url";
+    address.classList.add("address");
+    // the Jev endpoint field shows where the decision API moved to, until
+    // one is typed there
+    address.oninput = () => {
+      draft.address = address.value;
+      refreshEndpoints();
+      const du = ed.querySelector("input.decide-url");
+      if (du && draft.decide === draft.addressFrom.decide) du.value = movedURLs(draft)?.decide || draft.decide;
+    };
+    const keys = address.onkeydown;
+    address.onkeydown = (e) => { keys(e); if (e.key === "Enter" && isNew) save(); };
+    // folded: most run where the preset says; open for one that doesn't,
+    // or an address typed before the editor was drawn again
+    addressMore = el("details", "more");
+    addressMore.open = (own && originOf(from) !== originOf(pr)) || draft.address.trim() !== addressWas;
+    addressMore.append(el("summary", "", t("Server address")));
+    const inner = el("div", "inner");
+    inner.append(...field(t("Address"), address, t("Where the server listens; change the port, or give another computer's address")));
+    addressMore.append(inner);
+  }
+
   // null, not false, when there is none: false?.key is undefined, and a
   // provider with no key read .set of it (willz: a local Ollama without a
   // key opened no editor, its row just toggling)
@@ -9203,6 +9384,7 @@ function drawEditor(p, presetID) {
   if (p?.keyList?.filter((k) => k.on).length > 1) ed.append(...renderRouting(p));
   else if (vertex) ed.append(...vertexFields());
   else ed.append(...field(t("API key"), keyWrap, isNew ? t("Kept in ~/.config/magpie/providers.json, readable by you alone. Nothing is read from your shell.") : ""));
+  if (addressMore) ed.append(addressMore);
 
   // A user-defined provider can have its own picture; presets keep theirs.
   if (custom) ed.append(...field(t("Icon"), iconPicker(ed), ""));
@@ -9449,7 +9631,8 @@ function drawEditor(p, presetID) {
   // names the account, …/accounts/<id>/ai/run — in place of the preset's
   if (decides && !custom && (p?.preset || pr?.id) !== "remote-magpie") {
     if (draft.decide === undefined) draft.decide = p?.decide || pr?.decide || "";
-    const du = input(draft.decide, pr?.decide || "https://…", "url");
+    const du = input((address && movedURLs(draft)?.decide) || draft.decide, pr?.decide || "https://…", "url");
+    du.classList.add("decide-url");
     // Bailian's is at the host of the key's workspace (#647): its id is
     // typed on its own, the plan's address filled in with it
     if (!draft.region && pr?.regions?.some((r) => r.decide)) draft.region = (pr.regions.find((r) => r.decide && workspaceOf(r.decide, draft.decide) !== null) || pr.regions[0]).id;
@@ -9485,6 +9668,7 @@ function drawEditor(p, presetID) {
         src.gemini = vertexBase(draft.vertex);
         for (const x of row) x.hidden = !src.gemini;
       }
+      Object.assign(src, address && movedURLs(draft));
       ebox.replaceChildren(renderEndpoints(p, src));
     };
     refreshEndpoints();
@@ -9657,6 +9841,11 @@ function drawEditor(p, presetID) {
     if (isNew && custom && !body.chat && !body.anthropic && !body.responses && !body.decide) { url.focus(); return editorError(t("A base URL is needed"), "warn"); }
     if (endpoint && !body.chat && !body.responses) { endpoint.focus(); return editorError(t(pr.endpointNeeded || "Your resource's endpoint is needed"), "warn"); }
     if (vertex && !body.vertex.project) { vertexProject?.focus({ preventScroll: true }); return editorError(t("Google Vertex AI needs the id of your Google Cloud project"), "warn"); }
+    if (address) {
+      const a = (draft.address || "").trim();
+      if (localAddress(a) === null) { addressMore.open = true; address.focus({ preventScroll: true }); return editorError(t("Address: {v} isn't an address like http://localhost:11434", { v: a }), "warn"); }
+      Object.assign(body, movedURLs(draft));
+    }
     editorError("");
     saving(saveBtn, t(isNew ? "Adding…" : "Saving…"));
     providerAction("save", body, t(isNew ? "{name} added" : "{name} saved", { name: draft.name || draft.id }));
@@ -10769,6 +10958,7 @@ function renderModels(p) {
     };
     sayLabel();
     sfx.append(el("span", "", t("Provider in model names")), suffixSegs(sayLabel), sfxSaid);
+    sfx.append(noNamesLine("span", "said"));
     names.append(sfx);
     // the APIs a model can be asked on alone: those of a key's provider
     // it has a URL for, when it has more than one (01huadalang on Discord:
@@ -12536,6 +12726,20 @@ function renderAccounts(a, p) {
       }, "Account to stay signed in to", "sess-menu");
     };
     box.append(keep, as);
+    list.append(box);
+  }
+  // with more of its accounts on, magpie sends Codex's own requests through
+  // the gateway to fail over between them (#1385); this has it only switch
+  // Codex's own sign-in instead, its requests going straight to OpenAI
+  // (#1907: Codex Desktop and the CLI on their own subscription alone)
+  if (a.agent === "codex" && several && p) {
+    const box = el("div", "switch-only");
+    const [only, cb] = tick(t("Only switch {agent}'s sign-in", { agent: a.agentName }), !!p.switchOnly);
+    only.title = t("magpie signs {agent} in to the next account with room when the one it is on is used up, and back once that has room again, by writing {agent}'s own sign-in; {agent}'s requests go straight to OpenAI, never through magpie. A {agent} app or session already open stays on its account until it is opened again. Connected to magpie, {agent}'s requests go through it as before.", { agent: a.agentName });
+    cb.onchange = () => accountAction("provider/switchonly", { id: p.id, switchOnly: cb.checked }, cb.checked
+      ? t("magpie only switches {agent}'s sign-in; its requests go straight to OpenAI", { agent: a.agentName })
+      : t("{agent}'s requests go through magpie to fail over to your other accounts again", { agent: a.agentName }));
+    box.append(only);
     list.append(box);
   }
   if (a.agent === "codex" && providers?.codexDaemon) list.append(renderCodexDaemon(providers.codexDaemon));
@@ -14343,6 +14547,49 @@ function slug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^
 // dots kept (gpt-6.1-sol, #968).
 function groupSlug(s) { return s.toLowerCase().replace(/[^a-z0-9.]+/g, "-").replace(/\.{2,}/g, ".").replace(/^[-.]+|[-.]+$/g, ""); }
 function hostOf(u) { try { return new URL(u.includes("://") ? u : "https://" + u).host; } catch { return ""; } }
+
+// localAddress is a local server's address as typed, as provider.AtAddress
+// takes it: its origin, http when no scheme is given, any path dropped; ""
+// for nothing typed, null for what is no address.
+function localAddress(s) {
+  s = (s || "").trim();
+  if (!s) return "";
+  if (/\s/.test(s)) return null;
+  try {
+    const u = new URL(s.includes("://") ? s : "http://" + s);
+    if ((u.protocol !== "http:" && u.protocol !== "https:") || !u.hostname) return null;
+    return u.protocol + "//" + u.host;
+  } catch { return null; }
+}
+// originOf is the origin of the first of a provider's URLs that is set.
+function originOf(x) {
+  for (const u of [x?.chat, x?.responses, x?.anthropic]) {
+    if (!u) continue;
+    try { const v = new URL(u); return v.protocol + "//" + v.host; } catch {}
+  }
+  return "";
+}
+// movedURLs is a local server's URLs at the Address typed in its editor,
+// moved from the ones it opened with, or null while the Address is the one
+// it opened with or no address. Moved only then, and never into draft: URLs
+// a saved one has apart (another app's, the CLI's) stay as they are after
+// an Address is typed and put back.
+function movedURLs(d) {
+  if (!d?.addressFrom) return null;
+  const at = localAddress(d.address);
+  if (!at || at === d.addressWas) return null;
+  const out = atAddress(d.addressFrom, at);
+  // a decision endpoint typed in its own field is the user's: kept as typed
+  // (and one with none has none to move)
+  if (!out.decide || (d.decide !== undefined && d.decide !== d.addressFrom.decide)) delete out.decide;
+  return out;
+}
+// atAddress is urls each moved to origin, its path kept.
+function atAddress(urls, origin) {
+  const out = {};
+  for (const [k, v] of Object.entries(urls)) out[k] = v && origin ? v.replace(/^[a-z][\w+.-]*:\/\/[^/?#]*/i, origin) : v;
+  return out;
+}
 
 // the sheet opens below the list: it unrolls on the rows' spring and the
 // view goes down with it. The button stays at the view's foot however long
@@ -16640,8 +16887,22 @@ function pluginCheckin(id, name) {
     off: t("Have the {name} plugin check each account in once a day, as Settings' Daily check-in does", { name }),
   };
 }
+// the built-in check-in a plugin's provider took over, whose switch it
+// follows until its own is set: provider.PluginCheckinOn's switch
+const PLUGIN_CHECKIN_INHERITS = {
+  workbuddy: "workbuddyCheckin", "trae-cn": "traeCheckin",
+  "minimax-code": "minimaxCheckin", "minimax-code-global": "minimaxCheckin",
+  qoder: "qoderCheckin", "qoder-cn": "qoderCheckin",
+};
 function pluginCheckinOn(id) {
-  return !!(state.settings?.checkinPlugins || []).find((p) => p.id === id)?.on;
+  // /api/state carries the saved map, without /api/settings's plugin list.
+  // An explicit false must win over the list's inherited vendor default,
+  // and with neither the built-in's own switch is that default (#1912).
+  const prefs = state.settings;
+  const own = prefs?.pluginCheckins?.[id] ?? prefs?.checkinPlugins?.find((p) => p.id === id)?.on;
+  if (own !== undefined) return !!own;
+  const inherits = Object.hasOwn(PLUGIN_CHECKIN_INHERITS, id) ? PLUGIN_CHECKIN_INHERITS[id] : "";
+  return !!(inherits && prefs?.[inherits]);
 }
 function checkinRow(q, first, subs) {
   const by = q.checkinBy || "";
@@ -16679,6 +16940,9 @@ function checkinRow(q, first, subs) {
         // why, in the row: a reason only in the tooltip read as no reason (#808)
         text = t(on ? "Check-in failed; magpie tries again later" : "Check-in failed") + (r.msg ? " · " + r.msg : "");
     }
+  } else if (q.checkinOff) {
+    // left out on its own in Settings (#1902)
+    text = [t("Auto check-in is off for this account"), last].filter(Boolean).join(" · ");
   } else {
     kind = on ? "wait" : "";
     text = [t(on ? "Not checked in yet today" : "Auto check-in is off"), last].filter(Boolean).join(" · ");
@@ -16709,7 +16973,7 @@ function checkinRow(q, first, subs) {
   };
   row.append(auto);
   // pressed now: shown while an account isn't in today and could be
-  const due = subs.filter((x) => x.checkins && (x.checkinBy || "") === by && !(x.checkin?.day === today && x.checkin.outcome !== "failed"));
+  const due = subs.filter((x) => x.checkins && !x.checkinOff && (x.checkinBy || "") === by && !(x.checkin?.day === today && x.checkin.outcome !== "failed"));
   if (due.length) {
     const now = el("button", "text ci-now", t("Check in now"));
     now.type = "button";
@@ -16791,6 +17055,9 @@ function askReset(q) {
 }
 function closeConfirmAsk() {
   if (!confirmAsk) return;
+  // Escape and the backdrop must not expose row actions while a bulk write
+  // still holds an older full arrangement. Done is disabled for the same reason.
+  if (agentsVisibilitySaving && confirmAsk.classList.contains("ag-manager")) return;
   // one asked from an editor goes back to it rather than close it too
   const back = confirmAsk.back;
   confirmAsk = null;
@@ -18455,7 +18722,8 @@ const ledRowSpeed = (r) => { const d = ledDecode(r); return d ? d.n / (d.w / 100
 // after it is a floor of the answer's speed, when that time is a second or
 // more and the answer 100 tokens or more, as a measured one is. A Codex turn
 // of one call that tells neither tells its output over the whole turn, the
-// wait in it: all of it was written in that time. ledFloor_ says the tokens,
+// wait in it, by the same 1,000-token rule as any whole-time floor (Fallmonkey
+// on Discord: 11 tokens in 2.75 s read ≥4 tok/s). ledFloor_ says the tokens,
 // the ms, and which it is (answer, turn).
 const LED_FLOOR_AGENTS = new Set(["claude", "claude-desktop", "codex"]);
 const ledFloor_ = (r) => {
@@ -18463,7 +18731,7 @@ const ledFloor_ = (r) => {
   if (ledCodexTurn(r)) {
     const n = r.out - (r.reasoning || 0), w = r.ms - r.ttft_ms;
     if (r.reasoning > 0 && n >= LED_CODEX_BODY && w >= LED_CODEX_WINDOW_MS && n * 1000 <= 10000 * w) return { n, w, answer: true };
-    return r.out > 0 && r.ms >= 100 && r.out * 1000 <= 10000 * r.ms ? { n: r.out, w: r.ms, turn: true } : null;
+    return r.out >= 1000 && r.ms >= 1000 && r.out * 1000 <= 10000 * r.ms ? { n: r.out, w: r.ms, turn: true } : null;
   }
   return r.out >= 1000 && r.ms >= 1000 && r.out * 1000 <= 10000 * r.ms ? { n: r.out, w: r.ms } : null;
 };
@@ -19562,10 +19830,17 @@ function sessSums(list, key) {
 }
 
 // sessLevels grades values 0 (none) to 4 by the quartiles of those above 0,
-// as a calendar of contributions does
+// as a calendar of contributions does. Under eight such values a quartile
+// is one value or none, so two days 2% apart could be two shades apart and
+// one twice another the same (#1921): a few are graded by their share of the
+// busiest instead.
 function sessLevels(values) {
   const nz = values.filter((v) => v > 0).sort((a, b) => a - b);
   if (!nz.length) return () => 0;
+  if (nz.length < 8) {
+    const most = nz[nz.length - 1];
+    return (v) => v <= 0 ? 0 : Math.min(4, Math.max(1, Math.ceil(4 * v / most - 1e-9)));
+  }
   const q = (p) => nz[Math.min(nz.length - 1, Math.floor(p * nz.length))];
   const [a, b, c, top] = [q(0.25), q(0.5), q(0.75), nz[nz.length - 1]];
   return (v) => v <= 0 ? 0 : v >= top ? 4 : v <= a ? 1 : v <= b ? 2 : v <= c ? 3 : 4;
@@ -20913,6 +21188,11 @@ function renderSettings() {
   $("#qoderCheckinSub").textContent = [t("Claims each signed-in Qoder account's daily credits once a day"),
     ...(s.qoderCheckins || []).map(wbCheckinLine)].filter(Boolean).join(" · ");
   $("#qoderCheckinSub").title = t("As claiming the daily credits in Qoder does");
+  // and under each vendor's switch, its accounts', each on its own (#1902)
+  for (const [list, by] of [["#wbList", ""], ["#traeList", "trae"], ["#minimaxList", "minimax"], ["#qoderList", "qoder"]]) {
+    $(list).querySelectorAll(".ci-acct").forEach((x) => x.remove());
+    $(list).append(...checkinAccountRows(s, by));
+  }
   // and the plugins that check in themselves, a row each, their tab shown
   // while one is signed in
   renderPluginCheckins(s);
@@ -21002,7 +21282,7 @@ function renderSettings() {
   // gateway mode leaves out what is written into this computer's agents'
   // files, and the alerts its desktop would show
   for (const r of [$("#plainNamesSegs").parentElement, $("#codexAgentsV1Segs").parentElement, $("#fullContextSegs").parentElement,
-    $("#codexTitlesRow"), $("#codexAutoReviewRow"), $("#usageAlertRow"), $("#balanceAlertRow"), $("#resetReminderRow"), $("#turnDoneRow")]) r.hidden = gatewayMode;
+    $("#codexTitlesRow"), $("#codexDescriptionsRow"), $("#codexAutoReviewRow"), $("#usageAlertRow"), $("#balanceAlertRow"), $("#resetReminderRow"), $("#turnDoneRow")]) r.hidden = gatewayMode;
   // the parts' tabs, one gone whose rows are all hidden here
   setSetTab(setTab);
 }
@@ -21537,6 +21817,38 @@ function suffixSegs(drawn) {
   seg.drawnAgain = drawn;
   return seg;
 }
+// noNamesSaid: what Provider in model names can't change, said under it:
+// the connected agents whose own lists don't name magpie's models as it
+// says (agent.NoNames: handed ids alone, or the gateway's names alone).
+// love1sbug on X found the setting seemed to do nothing; "" when none is.
+function noNamesSaid() {
+  const names = (state.agents || []).filter((a) => a.wired && a.noNames).map((a) => a.name);
+  return names.length ? t("Changes nothing in {agents}: magpie’s names don’t reach their model lists", { agents: names.join(", ") }) : "";
+}
+// noNamesLine is that line, hidden while it says nothing: a page drawn
+// before the agents are read (Routing, a provider's editor) is said again
+// once they are (redrawNoNames)
+function noNamesLine(tag, cls) {
+  const e = el(tag, cls + " no-names");
+  e.dataset.noNames = "";
+  e.textContent = noNamesSaid();
+  e.hidden = !e.textContent;
+  return e;
+}
+function redrawNoNames() {
+  for (const e of document.querySelectorAll("[data-no-names]")) {
+    e.textContent = noNamesSaid();
+    e.hidden = !e.textContent;
+  }
+  if ($("#plainNamesSegs")) sayNoNamesInSettings();
+}
+// the Settings row's name says enough on its own (1ooogle on X): a line
+// under it only for an agent it changes nothing in
+function sayNoNamesInSettings() {
+  const who = $("#plainNamesSegs").parentElement.querySelector(".who"), said = noNamesSaid();
+  who.querySelector(".no-names")?.remove();
+  if (said) who.append(el("div", "sub no-names", said));
+}
 // redrawSuffix draws each suffix choice in the page again when the
 // settings that came in say another mode than it was drawn with: a page
 // drawn before the state's first read (Routing's groups can come back
@@ -21579,10 +21891,16 @@ function renderTrayUsage(s, keep) {
     (v) => savePrefs({ ...keep, chineseUnits: v })));
   renderAlerts(s, keep);
   $("#plainNamesSegs").replaceChildren(suffixSegs());
-  // Codex's OpenAI models in multi-agent V1, so their subagents can run on
-  // magpie's other models (#141)
+  sayNoNamesInSettings();
+  // Codex's own models in multi-agent V1 (their subagents' tasks go as text),
+  // so a GPT lead can run a subagent on magpie's other models (#141). Where
+  // Codex's own multi_agent_v2 is on in the config magpie routes it wins, and
+  // magpie writes nothing: the row says so and the user turns it off.
+  const v1Warn = $("#codexAgentsV1Warn");
+  v1Warn.hidden = !s.notice;
+  v1Warn.textContent = s.notice ? tNotice(s.notice) : "";
   $("#codexAgentsV1Segs").replaceChildren(segs([["off", t("Off")], ["on", t("On")]], s.codexAgentsV1 ? "on" : "off", (v) =>
-    writingPrefs(api("settings/codex-agents-v1", { on: v === "on" })).then((ns) => { prefs = ns; renderSettings(); }).catch((e) => { status(t(e.message), "err"); renderSettings(); })));
+    writingPrefs(api("settings/codex-agents-v1", { on: v === "on" })).then((ns) => { prefs = ns; renderSettings(); if (ns.notice) status(tNotice(ns.notice), "warn", 9000); }).catch((e) => { status(t(e.message), "err"); renderSettings(); })));
   // a 1M model's whole window, or compacting at the working one (X: Chen,
   // 70–90s to a first token at 550K)
   // at a size the user types too, not 272K alone (#876); a provider's own
@@ -21605,6 +21923,7 @@ function renderTrayUsage(s, keep) {
   compactRow.append(compactSegs, compactNum);
   $("#fullContextSegs").replaceChildren(compactRow);
   renderCodexTitles(s);
+  renderCodexDescriptions(s);
   renderCodexAutoReview(s);
   renderCodexMemories();
   const rate = s.fx?.rate;
@@ -22011,6 +22330,31 @@ function renderAlerts(s, keep) {
   const turnOpts = [["0", t("Off")], ...mins.map((m) => [String(m * 60), t("{n} min", { n: m })])];
   if (d && !mins.some((m) => m * 60 === d)) turnOpts.push([String(d), d % 60 ? t("{n} s", { n: d }) : t("{n} min", { n: d / 60 })]);
   $("#turnDoneSegs").replaceChildren(segs(turnOpts, String(d), (v) => savePrefs({ ...keep, turnDoneAlert: Number(v) })));
+}
+
+// renderCodexDescriptions picks the model for descriptions independently
+// of titles; an empty setting preserves Codex's requested model.
+function renderCodexDescriptions(s) {
+  const models = s.titleModels || [];
+  const named = (id) => {
+    const m = models.find((x) => x.id === id);
+    return m ? `${m.name || m.id} · ${m.providerName}` : id;
+  };
+  const v = s.codexDescriptions || "";
+  const b = el("button", "rt-cond on");
+  b.type = "button";
+  b.setAttribute("aria-label", t("Codex thread descriptions"));
+  if (v) b.append(icon(models.find((x) => x.id === v)?.icon || "generic"), el("span", "", named(v)));
+  else b.append(icon("openai"), el("span", "", t("Codex’s own (ChatGPT)")));
+  const opt = (x) => ({ value: x.id, label: x.name || x.id, note: x.providerName, icon: x.icon, group: x.provider ? x.providerName : ROUTING_GROUPS, ref: x.id });
+  b.onclick = (ev) => openPicker({ id: "", name: "", fields: [] }, { key: "codexDescriptions", label: "model", value: v, options: [
+    { value: "", label: t("Codex’s own (ChatGPT)"), note: t("as Codex sends them"), icon: "openai", reset: true },
+    ...models.map(opt)],
+  onPick: (id) => {
+    if (id === v) return;
+    writingPrefs(api("settings/codex-descriptions", { model: id })).then((ns) => { prefs = ns; renderSettings(); }).catch((e) => { status(t(e.message), "err"); renderSettings(); });
+  } }, b, ev);
+  $("#codexDescriptionsPick").replaceChildren(b);
 }
 
 // renderCodexTitles: where Codex's requests for a thread's title go (#705)
@@ -23266,8 +23610,34 @@ function renderPluginCheckins(s) {
       }
     }));
     row.append(who, segBox);
+    return [row, ...checkinAccountRows(s, "plugin:" + p.id)];
+  }).flat());
+}
+
+// checkinAccountRows are an Off/On row for each account vendor by checks
+// in (#1902, magicLaLa: 根据每个账号设置是否开启自动签到), under its Daily
+// check-in; none for a vendor of one account, whose switch is its own.
+function checkinAccountRows(s, by) {
+  const accts = (s.checkinAccounts || []).filter((a) => (a.by || "") === by);
+  if (accts.length < 2) return [];
+  return accts.map((a) => {
+    const row = el("div", "row pref ci-acct");
+    row.dataset.key = a.key;
+    const who = el("div", "who");
+    who.append(el("div", "name", a.user || a.key), el("div", "sub", t(a.on ? "Checked in once a day while Daily check-in is on" : "Left out of the daily check-in")));
+    const segBox = el("div");
+    segBox.append(segs([["off", t("Off")], ["on", t("On")]], a.on ? "on" : "off", async (v) => {
+      try {
+        prefs = await writingPrefs(api("settings/checkin-account", { key: a.key, on: v === "on" }));
+        state.settings = prefs;
+      } catch (err) {
+        status(t(err.message), "err");
+      }
+      renderSettings();
+    }));
+    row.append(who, segBox);
     return row;
-  }));
+  });
 }
 
 // wbCheckinLine is how an account's last WorkBuddy check-in went: today's

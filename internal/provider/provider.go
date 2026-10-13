@@ -138,6 +138,12 @@ type Provider struct {
 	// the user uses the agent as, while the first is only the one whose
 	// allowance is spent first (#524). Empty, it is the first.
 	KeepLoginAs string `json:"keepLoginAs,omitempty"`
+	// SwitchOnly, on Codex's subscription, has magpie only move Codex's
+	// own sign-in (auth.json) to the next account with room and back:
+	// Codex's requests then go straight to OpenAI, never through the
+	// gateway for account failover, however many of its accounts are on
+	// (#1907).
+	SwitchOnly bool `json:"switchOnly,omitempty"`
 
 	// MaxConcurrency is how many requests may be out at the vendor at once
 	// on each of its keys or accounts (Discord, Lemon: a Codex account is
@@ -559,16 +565,7 @@ func allProviders() []Provider {
 		if _, taken := find(out, a.ID); taken || picks[a.ID].Hidden {
 			continue
 		}
-		pk := picks[a.ID]
-		a.PickedFrom = pk.PickedFrom
-		a.Models, a.Unlisted, a.Off, a.Fallback, a.Routing, a.Affinity, a.KeepLogin, a.KeepLoginAs, a.Contexts, a.Family = pk.Models, pk.Unlisted, pk.Off, pk.Fallback, pk.Routing, pk.Affinity, pk.KeepLogin, pk.KeepLoginAs, pk.Contexts, pk.Family
-		a.Sink, a.NoModels = pk.Sink, pk.NoModels
-		a.Proxy, a.AccountProxies, a.AccountModels = pk.Proxy, pk.AccountProxies, pk.AccountModels
-		a.AccountCaps, a.AccountWindowCaps = pk.AccountCaps, pk.AccountWindowCaps
-		a.AccountNames = pk.AccountNames
-		a.MaxConcurrency, a.PinUpstream = pk.MaxConcurrency, pk.PinUpstream
-		a.AccountConcurrency, a.QueueLimit, a.QueueWait = pk.AccountConcurrency, pk.QueueLimit, pk.QueueWait
-		a.MaxRPM = pk.MaxRPM
+		a = withPicks(a, picks[a.ID])
 		if a.ID == "cursor" { // picked before its efforts were one model
 			a.Models = cursorPicks(a.Models)
 		}
@@ -578,6 +575,26 @@ func allProviders() []Provider {
 		out = append(out, a)
 	}
 	return ordered(out, f.Order)
+}
+
+// withPicks is the signed-in account a with what the user set on its
+// provider (pk, as providers.json keeps it): its models, routing, limits
+// and queue. The account the agent is signed in to gets them in All, and
+// each other account in use beside it in AlsoOn, so that every account of
+// the provider keeps the same settings (#1899: a second WorkBuddy AI
+// account queued 62s with the wait set to 1s).
+func withPicks(a, pk Provider) Provider {
+	a.PickedFrom = pk.PickedFrom
+	a.Models, a.Unlisted, a.Off, a.Fallback, a.Routing, a.Affinity, a.KeepLogin, a.KeepLoginAs, a.Contexts, a.Family = pk.Models, pk.Unlisted, pk.Off, pk.Fallback, pk.Routing, pk.Affinity, pk.KeepLogin, pk.KeepLoginAs, pk.Contexts, pk.Family
+	a.SwitchOnly = pk.SwitchOnly
+	a.Sink, a.NoModels = pk.Sink, pk.NoModels
+	a.Proxy, a.AccountProxies, a.AccountModels = pk.Proxy, pk.AccountProxies, pk.AccountModels
+	a.AccountCaps, a.AccountWindowCaps = pk.AccountCaps, pk.AccountWindowCaps
+	a.AccountNames = pk.AccountNames
+	a.MaxConcurrency, a.PinUpstream = pk.MaxConcurrency, pk.PinUpstream
+	a.AccountConcurrency, a.QueueLimit, a.QueueWait = pk.AccountConcurrency, pk.QueueLimit, pk.QueueWait
+	a.MaxRPM = pk.MaxRPM
+	return a
 }
 
 // Hidden lists the signed-in accounts the user removed from magpie.
@@ -691,7 +708,7 @@ func Save(p Provider) error {
 		if p.ID == "kiro" {
 			key = p.Key
 		}
-		p = Provider{ID: p.ID, Key: key, Models: p.Models, NoModels: p.NoModels, PickedFrom: p.PickedFrom, Unlisted: p.Unlisted, Off: p.Off, Fallback: p.Fallback, Routing: p.Routing, Sink: p.Sink, Affinity: p.Affinity, KeepLogin: p.KeepLogin, KeepLoginAs: p.KeepLoginAs, Contexts: p.Contexts, Family: p.Family, Proxy: p.Proxy, AccountProxies: p.AccountProxies, AccountModels: p.AccountModels, AccountCaps: p.AccountCaps, AccountWindowCaps: p.AccountWindowCaps, AccountNames: p.AccountNames, MaxConcurrency: p.MaxConcurrency, AccountConcurrency: p.AccountConcurrency, QueueLimit: p.QueueLimit, QueueWait: p.QueueWait, MaxRPM: p.MaxRPM, QuotaRest: p.QuotaRest, PinUpstream: p.PinUpstream, Hidden: hiddenAccount(p.ID), Quiet: quietAccount(p.ID), Tucked: tuckedAccount(p.ID)}
+		p = Provider{ID: p.ID, Key: key, Models: p.Models, NoModels: p.NoModels, PickedFrom: p.PickedFrom, Unlisted: p.Unlisted, Off: p.Off, Fallback: p.Fallback, Routing: p.Routing, Sink: p.Sink, Affinity: p.Affinity, KeepLogin: p.KeepLogin, KeepLoginAs: p.KeepLoginAs, SwitchOnly: p.SwitchOnly, Contexts: p.Contexts, Family: p.Family, Proxy: p.Proxy, AccountProxies: p.AccountProxies, AccountModels: p.AccountModels, AccountCaps: p.AccountCaps, AccountWindowCaps: p.AccountWindowCaps, AccountNames: p.AccountNames, MaxConcurrency: p.MaxConcurrency, AccountConcurrency: p.AccountConcurrency, QueueLimit: p.QueueLimit, QueueWait: p.QueueWait, MaxRPM: p.MaxRPM, QuotaRest: p.QuotaRest, PinUpstream: p.PinUpstream, Hidden: hiddenAccount(p.ID), Quiet: quietAccount(p.ID), Tucked: tuckedAccount(p.ID)}
 	} else {
 		p.AccountProxies = keyProxies(p) // a provider of keys proxies each key apart
 		if subscriptionID(p.ID) && !stored(p.ID) {

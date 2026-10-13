@@ -11,7 +11,7 @@ three.
 
 | Part | Responsibility | Source |
 | --- | --- | --- |
-| Native host | `Run` starts the Wails v3 app: the tray icon, the panel, the main window, single-instance handover, `magpie://` import links and open at login. `host` implements `Windows` for the API: show and hide, open URLs and folders, copy to the clipboard, fit and tint the panel, and set the text size. | [`app.go`](../../internal/gui/app.go), [`mainwindow.go`](../../internal/gui/mainwindow.go), [`traymenu.go`](../../internal/gui/traymenu.go) |
+| Native host | `Run` starts the Wails v3 app: the tray icon, the panel, the main window, single-instance handover, `magpie://` import links and open at login. `host` implements `Windows` for the API: show and hide, open URLs and folders, copy to the clipboard, fit and tint the panel, and set the text size. A copy on Linux sets PRIMARY before CLIPBOARD, since GTK 3 serves CLIPBOARD empty when PRIMARY is set after it on a compositor with no primary selection (KDE Plasma with middle-click paste off, #1881); on Wayland the copy is read back through the compositor, and one that doesn't read back whole answers `/api/copy` with 501, so the page tries its clipboard API, then the copy command, then says the copy failed with the text to copy by hand (`copy-fallback.test.cjs`). | [`app.go`](../../internal/gui/app.go), [`clipboard_gtk3.go`](../../internal/gui/clipboard_gtk3.go), [`clipboard_gtk3.h`](../../internal/gui/clipboard_gtk3.h), [`mainwindow.go`](../../internal/gui/mainwindow.go), [`traymenu.go`](../../internal/gui/traymenu.go) |
 | Backend | `startBackend` starts the gateway this process serves, unless another magpie already serves it. In that case this process only shows the other one's status (`gw` is nil). `stopServing` drains requests in flight. | [`backend.go`](../../internal/gui/backend.go) |
 | API and assets | `Handler` serves `assets/` (embedded with `//go:embed assets`) and the `/api/*` routes, such as `/api/state`, `/api/set` and `/api/agents/{action}/{id}`. `held` lets one API request's reads share one catalog build (`provider.Hold`), and drops it after any write. `revalidated` and `versionedPage` name each script by its content hash, so a cache never serves an old `app.js` under a new page; a file asked for under its current hash (`?v=`) is cached for good (`immutable`), anything else is revalidated by its ETag. | [`api.go`](../../internal/gui/api.go) |
 | Browser mode | `StartWeb` serves the page and the gateway for `magpie web`. The browser signs in with a run key in a link. Gateway mode shows Providers, Gateway, Routing, Usage, Sessions, Plugins and Settings on a machine that is only a gateway. `webHandler` gzips the page's text files and the API's JSON for a browser that takes gzip (`webCompressed`, with a `-gzip` ETag that still answers 304); the app's own windows read the page in-process and get it uncompressed. | [`web.go`](../../internal/gui/web.go), [`gatewaymode.go`](../../internal/gui/gatewaymode.go) |
@@ -198,6 +198,27 @@ under its id (`render`, #1835). The row itself keeps one line: the
 fullest window while idle, what it is doing while it answers. See
 `routing-seat-windows.test.cjs`.
 
+### Stored agent sessions in WSL
+
+The Sessions page uses `sessions.ListAgent`; Usage → Sessions uses
+`sessions.List` and `StatsFor` through the handlers in
+[`sessions.go`](../../internal/gui/sessions.go) and
+[`sessions_manage.go`](../../internal/gui/sessions_manage.go).
+On Windows, [`internal/sessions/wsl.go`](../../internal/sessions/wsl.go)
+reads running distros through their WSL shared paths. A stopped distro keeps
+its cached listing and is not opened; running distros are relisted at most
+every 30 seconds.
+
+For omp, [`ompRootsIn`](../../internal/sessions/omp.go) includes both
+`~/.omp/agent/sessions` and
+`~/.omp/profiles/<name>/agent/sessions`. Subagents and advisor files count
+in their parent session. A profile session's Resume command selects its
+own profile with `omp --profile <name> --resume <id>`, including when
+resumed through `wsl.exe`. Delete and Restore preserve its original
+profile path and artifacts. Windows does not discover arbitrary stores
+selected by a distro's `PI_CODING_AGENT_DIR`, XDG variables or
+`--session-dir`.
+
 ### Desktop fonts
 
 Settings → General offers independent interface and code fonts, each with
@@ -254,6 +275,21 @@ remain in the list, preserves them across summary refreshes, and offers a
 retry after a failed read. See `TestRecentCallBodiesOnDemand` and
 `recent-call-bodies.test.cjs`.
 
+### Plugin check-in switches
+
+A plugin's Usage-card Auto check-in button reads the persisted
+`settings.pluginCheckins[provider]` first (`pluginCheckinOn` in
+[`app.js`](../../internal/gui/assets/app.js)). `/api/state` returns that map
+without the derived `checkinPlugins` list included by `/api/settings`.
+An explicit saved false wins over the list; when no saved choice exists,
+the list's resolved vendor default remains the fallback, and without the
+list (a state refresh) the switch of the built-in check-in the plugin took
+over is (`PLUGIN_CHECKIN_INHERITS`, the ids `provider.PluginCheckinOn` names;
+a test reads both). This keeps a saved
+switch on through a focus refresh and lets the next click turn it off.
+[`plugin-checkin.test.cjs`](../../internal/gui/tests/plugin-checkin.test.cjs)
+covers both response shapes, refreshes and the subsequent toggle.
+
 ### Shared UI rules
 
 - Settings → General is laid out as macOS System Settings is (1ooogle on X): a row says its name alone when that says enough (Appearance, Language, Text size, the fonts, the tray click, the Codex model rows, Open at login, Show in Dock), and keeps one short line where the setting isn't clear from its name or has a consequence (Long conversations, Lightweight mode, Prevent sleep, Session terminal, Codex subagents). A font row's line shows only while its fonts load or fail; the text size keys are the choices' tooltip. Language is one menu button showing the language picked, opened in the app's menu (`renderLangPick`). See `settings-general.test.cjs`.
@@ -290,6 +326,11 @@ Routing's New group buttons share `newGroup`, which asks before replacing a
 dirty group draft; Cancel retains the draft and Discard opens the new editor.
 `newGroupWith` applies the same guard when creating a group from a model and
 waits for `show` to accept navigation before creating its draft.
+
+The Plugins page updates the npm search-results section when a search answers,
+leaving suggested plugin cards in place so a click begun before the answer still
+opens the intended plugin. `plugin-market.test.cjs` holds the search response
+between pointerdown and pointerup to check this in Chromium and WebKit.
 
 ## Verification
 
@@ -336,3 +377,28 @@ Apple silicon), they check a program that names its SDK in
 `LC_VERSION_MIN_MACOSX`, as go test links one for an Intel Mac. Their
 presses are sent within the test's own process, and no system setting
 changes.
+
+### Agent visibility management
+
+The Agents page's Manage button sits inside the list's footer beside the fold
+control, and stays available when nothing is folded. The tray panel keeps its
+existing fold control. The Manage agents dialog includes folded and hidden agents.
+Search matches names and IDs; select all and invert apply to the search results,
+while Select unconnected agents replaces the selection with matching agents not
+on magpie (neither wired, added nor drifting). Selection survives search changes.
+Hide selected and Unhide selected each save one arrangement through the existing
+`POST /api/agents/arrange`, preserving order and agents outside the operation.
+Only a successful save changes the list; a failure keeps the selection for retry.
+While saving, Done, Escape and the backdrop cannot close the manager and expose
+conflicting row actions. Closing is restored on either success or failure.
+A completed save invalidates older in-flight state reads for the arrangement
+fields only. Fresh reads still accept other windows' visibility changes; bulk
+unhide does not add a lasting client-side override. These races are covered by
+`agent-visibility-saving.test.cjs`.
+While the manager is open, state refreshes update its visibility labels and
+action availability in place, preserving the search, selection and keyboard focus.
+These operations never connect, disconnect or edit an agent's files. Unhiding
+still follows the existing Not set up folding rules. The dialog explains that
+restoring visibility does not pin an unconfigured agent into the main list.
+See `agent-bulk-visibility.test.cjs` for persistence, partial selection, failed
+saves, narrow layouts and all five languages in Chromium and WebKit.

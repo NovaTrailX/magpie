@@ -6,6 +6,8 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/yetone/magpie/internal/agent"
 )
 
 // Every agent on the Agents page that reads skills has a place for them in
@@ -168,6 +170,172 @@ func TestDroidGrokInstructions(t *testing.T) {
 		if s := read(t, f); s != "# Mine\n\n"+blockBegin+"\nUse tabs.\n"+blockEnd+"\n" {
 			t.Errorf("%s's AGENTS.md:\n%s", id, s)
 		}
+	}
+}
+
+// Qwen Code reads QWEN.md in its folder ($QWEN_HOME, else ~/.qwen) before
+// every conversation (wongxy on Discord): the library's instructions reach
+// it there, after what the user wrote, which stays; its settings'
+// context.fileName, a JSONC list whose first non-empty name Qwen Code
+// writes itself, names another file.
+func TestQwenInstructions(t *testing.T) {
+	h := sandbox(t)
+	dir := filepath.Join(h, ".qwen")
+	write(t, filepath.Join(dir, "settings.json"), "{\n  \"model\": {\"name\": \"qwen3.8-max\"}\n}\n")
+	inst := filepath.Join(dir, "QWEN.md")
+	write(t, inst, "# Mine\n")
+	if tg := targetByID("qwen"); tg == nil || tg.Instructions != inst {
+		t.Fatalf("Qwen Code's instructions: %+v", tg)
+	}
+	if id, err := Takes("qwen-code", "instructions"); err != nil || id != "qwen" {
+		t.Fatalf("Takes(qwen-code): %q %v", id, err)
+	}
+	shared := "Use tabs."
+	ok(t)(SaveInstructions(InstructionsChange{Shared: &shared, Agents: []string{"qwen"}}))
+	if s := read(t, inst); s != "# Mine\n\n"+blockBegin+"\nUse tabs.\n"+blockEnd+"\n" {
+		t.Fatalf("QWEN.md:\n%s", s)
+	}
+	if cfg := read(t, filepath.Join(dir, "settings.json")); !strings.Contains(cfg, "qwen3.8-max") {
+		t.Fatalf("instructions rewrote the settings:\n%s", cfg)
+	}
+
+	// $QWEN_HOME moves the folder, and context.fileName renames the file
+	q := filepath.Join(h, "qwen-home")
+	t.Setenv("QWEN_HOME", q)
+	write(t, filepath.Join(q, "settings.json"), "{\n  // mine\n  \"context\": {\"fileName\": [\"  \", \" AGENTS.md \", \"QWEN.md\"]},\n}\n")
+	if tg := targetByID("qwen"); tg == nil || tg.Instructions != filepath.Join(q, "AGENTS.md") {
+		t.Fatalf("Qwen Code under QWEN_HOME with context.fileName: %+v", tg)
+	}
+	write(t, filepath.Join(q, "settings.json"), "{\"context\": {\"fileName\": \"MY.md\"}}")
+	if tg := targetByID("qwen"); tg == nil || tg.Instructions != filepath.Join(q, "MY.md") {
+		t.Fatalf("context.fileName as one name: %+v", tg)
+	}
+}
+
+// Kimi Code 2.x, fx, Prime Agent, StepCode and jcode each read one
+// user-wide instructions file of their own, which the library writes into
+// with the user's own text kept; Prime Agent and StepCode read only the
+// first of their names there is, and StepCode its AGENTS.override.md
+// instead of any.
+func TestSiblingInstructions(t *testing.T) {
+	h := sandbox(t)
+	write(t, filepath.Join(h, ".kimi-code", "config.toml"), "default_model = \"k3\"\n")
+	write(t, filepath.Join(h, ".fx", "settings.json"), "{}")
+	write(t, filepath.Join(h, ".prime", "agent", "settings.json"), "{}")
+	write(t, filepath.Join(h, ".stepcode", "config.toml"), "defaultModel = \"step-3\"\n")
+	write(t, filepath.Join(h, ".jcode", "config.toml"), "")
+	// a user's own CLAUDE.md is the one Prime Agent reads, not a new AGENTS.md
+	write(t, filepath.Join(h, ".prime", "agent", "CLAUDE.md"), "# Mine\n")
+	want := map[string]string{
+		"kimi":        filepath.Join(h, ".kimi-code", "AGENTS.md"),
+		"fx":          filepath.Join(h, ".fx", "AGENTS.md"),
+		"prime-agent": filepath.Join(h, ".prime", "agent", "CLAUDE.md"),
+		"stepcode":    filepath.Join(h, ".stepcode", "agent", "AGENTS.md"),
+		"jcode":       filepath.Join(h, ".jcode", "prompt-overlay.md"),
+	}
+	for id, inst := range want {
+		if tg := targetByID(id); tg == nil || tg.Instructions != inst {
+			t.Fatalf("%s's instructions: %+v, want %s", id, tg, inst)
+		}
+		if got, err := Takes(id, "instructions"); err != nil || got != id {
+			t.Fatalf("Takes(%s): %q %v", id, got, err)
+		}
+	}
+	if tg := targetByID("stepcode"); tg.Override != filepath.Join(h, ".stepcode", "agent", "AGENTS.override.md") {
+		t.Fatalf("StepCode's override: %q", tg.Override)
+	}
+	shared := "Use tabs."
+	ok(t)(SaveInstructions(InstructionsChange{Shared: &shared, Agents: []string{"kimi", "fx", "prime-agent", "stepcode", "jcode"}}))
+	for id, inst := range want {
+		pre := ""
+		if id == "prime-agent" {
+			pre = "# Mine\n\n"
+		}
+		if s := read(t, inst); s != pre+blockBegin+"\nUse tabs.\n"+blockEnd+"\n" {
+			t.Fatalf("%s's %s:\n%s", id, filepath.Base(inst), s)
+		}
+	}
+
+	// variables move them: $JCODE_HOME, $STEP_CODING_AGENT_DIR
+	j := filepath.Join(h, "jhome")
+	t.Setenv("JCODE_HOME", j)
+	write(t, filepath.Join(j, "config.toml"), "")
+	if tg := targetByID("jcode"); tg == nil || tg.Instructions != filepath.Join(j, "prompt-overlay.md") {
+		t.Fatalf("jcode under JCODE_HOME: %+v", tg)
+	}
+	s := filepath.Join(h, "step", "my-agent")
+	t.Setenv("STEP_CODING_AGENT_DIR", s)
+	write(t, filepath.Join(h, "step", "config.toml"), "")
+	if tg := targetByID("stepcode"); tg == nil || tg.Instructions != filepath.Join(s, "AGENTS.md") || tg.Override != filepath.Join(s, "AGENTS.override.md") {
+		t.Fatalf("StepCode under STEP_CODING_AGENT_DIR: %+v", tg)
+	}
+
+	// the old kimi-cli reads no user-wide instructions
+	t.Setenv("KIMI_CODE_HOME", "")
+	if err := os.RemoveAll(filepath.Join(h, ".kimi-code")); err != nil {
+		t.Fatal(err)
+	}
+	write(t, filepath.Join(h, ".kimi", "config.toml"), "")
+	if tg := targetByID("kimi"); tg == nil || tg.Instructions != "" {
+		t.Fatalf("kimi-cli's instructions: %+v", tg)
+	}
+}
+
+// Qoder, Command Code, CodeBuddy Code and Reasonix read a user-wide
+// instructions file in their own folders too: Qoder's renamed by its
+// settings' context.fileName, CodeBuddy's the first of its two names there
+// is, Reasonix's in its state folder wherever that is moved.
+func TestSiblingInstructionsMore(t *testing.T) {
+	h := sandbox(t)
+	write(t, filepath.Join(h, ".qoder", "settings.json"), "{}")
+	write(t, filepath.Join(h, ".commandcode", "settings.json"), "{}")
+	write(t, filepath.Join(h, ".codebuddy", "settings.json"), "{}")
+	write(t, filepath.Join(h, ".codebuddy", "CODEBUDDY.mdc"), "# Mine\n")
+	want := map[string]string{
+		"qoder":       filepath.Join(h, ".qoder", "AGENTS.md"),
+		"commandcode": filepath.Join(h, ".commandcode", "AGENTS.md"),
+		"codebuddy":   filepath.Join(h, ".codebuddy", "CODEBUDDY.mdc"),
+	}
+	for id, inst := range want {
+		if tg := targetByID(id); tg == nil || tg.Instructions != inst {
+			t.Fatalf("%s's instructions: %+v, want %s", id, tg, inst)
+		}
+	}
+	shared := "Use tabs."
+	ok(t)(SaveInstructions(InstructionsChange{Shared: &shared, Agents: []string{"qoder", "commandcode", "codebuddy"}}))
+	for id, inst := range want {
+		pre := ""
+		if id == "codebuddy" {
+			pre = "# Mine\n\n"
+		}
+		if s := read(t, inst); s != pre+blockBegin+"\nUse tabs.\n"+blockEnd+"\n" {
+			t.Fatalf("%s's %s:\n%s", id, filepath.Base(inst), s)
+		}
+	}
+	if cfg := read(t, filepath.Join(h, ".qoder", "settings.json")); cfg != "{}" {
+		t.Fatalf("instructions rewrote Qoder's settings: %s", cfg)
+	}
+
+	// Qoder's context.fileName; Reasonix's [storage] state, then its variable
+	write(t, filepath.Join(h, ".qoder", "settings.json"), `{"context": {"fileName": ["QODER.md", "AGENTS.md"]}}`)
+	if tg := targetByID("qoder"); tg == nil || tg.Instructions != filepath.Join(h, ".qoder", "QODER.md") {
+		t.Fatalf("Qoder with context.fileName: %+v", tg)
+	}
+	// Reasonix Studio is found by its app alone, so its target is asked
+	// of the agent as magpie makes it
+	rx := filepath.Join(h, ".reasonix")
+	reasonix := &agent.Agent{ID: "reasonix", Dir: rx, Path: filepath.Join(rx, "config.toml")}
+	if tg := targetOf(reasonix); tg == nil || tg.Instructions != filepath.Join(rx, "REASONIX.md") {
+		t.Fatalf("Reasonix's instructions: %+v", tg)
+	}
+	write(t, reasonix.Path, "[storage]\nstate = \"~/rx-state\"\n")
+	if tg := targetOf(reasonix); tg.Instructions != filepath.Join(h, "rx-state", "REASONIX.md") {
+		t.Fatalf("Reasonix with [storage] state: %+v", tg)
+	}
+	st := filepath.Join(h, "rx-env-state")
+	t.Setenv("REASONIX_STATE_HOME", st)
+	if tg := targetOf(reasonix); tg.Instructions != filepath.Join(st, "REASONIX.md") {
+		t.Fatalf("Reasonix under REASONIX_STATE_HOME: %+v", tg)
 	}
 }
 

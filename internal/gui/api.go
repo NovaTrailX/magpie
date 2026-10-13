@@ -198,6 +198,9 @@ type agentJSON struct {
 	// Menu: its own model menu is the models picked here, no one model to
 	// start on (agent.ListsModels): ZCode's, Cursor Private Inference's
 	Menu bool `json:"menu,omitempty"`
+	// NoNames: its own list doesn't name magpie's models as Names in agents'
+	// lists says (agent.NoNames), for that setting to say so
+	NoNames bool `json:"noNames,omitempty"`
 	// Source: what an agent not connected runs on now (agent.Source), and
 	// Stale: copies of a connected one still running on the list they
 	// started with (agent.Stale), for the line under its name
@@ -360,6 +363,10 @@ type settingsJSON struct {
 	// Rekeyed is what an agent beyond loopback, given the sharing key,
 	// couldn't be set again with when sharing changed (agent.Rekey)
 	Rekeyed string `json:"rekeyed,omitempty"`
+	// Notice is a Settings row's warning when a setting can't take effect:
+	// the Codex subagents row when Codex's own multi_agent_v2 is on in the
+	// config magpie routes (#141)
+	Notice string `json:"notice,omitempty"`
 	// Mac apps that explicitly handle .command files, for resumed sessions.
 	TerminalApps    []terminalChoice `json:"terminalApps,omitempty"`
 	TerminalDefault string           `json:"terminalDefault,omitempty"`
@@ -448,6 +455,9 @@ type settingsJSON struct {
 	// and a Qoder or Qoder CN account (its plugin's), and theirs
 	Qoder         bool                        `json:"qoder"`
 	QoderCheckins []provider.WorkBuddyCheckin `json:"qoderCheckins,omitempty"`
+	// every account each vendor's daily check-in reaches, and whether the
+	// user left it out (#1902)
+	CheckinAccounts []provider.CheckinAccount `json:"checkinAccounts,omitempty"`
 	// and the plugins' providers that check in themselves (auth.checkin),
 	// each with its switch and its accounts' last check-ins
 	CheckinPlugins []provider.PluginCheckin `json:"checkinPlugins,omitempty"`
@@ -592,6 +602,7 @@ func settingsState() settingsJSON {
 	s.MiniMax, s.MiniMaxCheckins = provider.HasMiniMax(), provider.MiniMaxCheckins()
 	s.Qoder, s.QoderCheckins = provider.HasQoder(), provider.QoderCheckins()
 	s.CheckinPlugins = provider.PluginCheckins()
+	s.CheckinAccounts = provider.CheckinAccounts()
 	s.VisionAuto, s.VisionModels, s.VisionMissing = gateway.AutoVision(), []modelRef{}, gateway.VisionMissing()
 	for _, e := range provider.Served() {
 		if e.Images && (e.ImageInput == nil || *e.ImageInput) && (e.Group != "" || e.Provider.Ready()) {
@@ -634,6 +645,13 @@ func settingsState() settingsJSON {
 	}
 	if v := gateway.ListedDrawer(s.ImageGen); v != s.ImageGen {
 		s.ImageGenShown = v
+	}
+	// the Codex subagents row's warning: magpie's multi-agent V1 doesn't reach
+	// Codex where its own multi_agent_v2 is on in the config magpie routes, and
+	// magpie writes nothing there — the setting is the user's to turn off
+	// (#141). Shown on every read, so the row carries it after a reload too.
+	if s.CodexAgentsV1 {
+		s.Notice = agent.CodexSubAgentsV1Warning()
 	}
 	return s
 }
@@ -1115,6 +1133,7 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 		in.FastPicks = cur.FastPicks             // switched in the agents' pickers (#954)
 		in.AgentEfforts = cur.AgentEfforts       // picked in an agent's row (#1003)
 		in.PluginCheckins = cur.PluginCheckins   // set on its own (plugin-checkin below)
+		in.CheckinOff = cur.CheckinOff           // set on its own (checkin-account below)
 		settings.CarryPerModel(&in, &cur)
 		in.LAN, in.LANKey = cur.LAN, cur.LANKey
 		in.LANKeyID = cur.LANKeyID
@@ -1145,7 +1164,8 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 		// and the Get started card put away, from the card itself
 		in.GuideHidden = cur.GuideHidden
 
-		in.CodexTitles = cur.CodexTitles // set on its own (codex-titles below)
+		in.CodexTitles = cur.CodexTitles             // set on its own (codex-titles below)
+		in.CodexDescriptions = cur.CodexDescriptions // set on its own (codex-descriptions below)
 		// and so is the model Codex's auto-review runs on (codex-auto-review)
 		in.CodexAutoReview = cur.CodexAutoReview
 		// and the model Codex's subagents are put on, set in Codex's row
@@ -1397,6 +1417,29 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 		}
 		writeJSON(rw, settingsState())
 	})
+	// where Codex's request for a thread's description goes: "" as Codex
+	// sends it, or a model's id. It is separate from the title setting.
+	mux.HandleFunc("POST /api/settings/codex-descriptions", func(rw http.ResponseWriter, r *http.Request) {
+		var in struct{ Model string }
+		if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
+			fail(rw, err)
+			return
+		}
+		v := strings.TrimSpace(in.Model)
+		if v != "" {
+			if _, _, ok := provider.Resolve(v); !ok {
+				fail(rw, fmt.Errorf("no model %s to write Codex's descriptions", v))
+				return
+			}
+		}
+		s := settings.Load()
+		s.CodexDescriptions = v
+		if err := settings.Save(s); err != nil {
+			fail(rw, err)
+			return
+		}
+		writeJSON(rw, settingsState())
+	})
 	// where Codex's requests for a thread's title go (#705): "" as Codex
 	// sends them, "off", or a model's id
 	// the models turned off for every request through magpie (#1867), each
@@ -1595,6 +1638,36 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 			s.PluginCheckins = map[string]bool{}
 		}
 		s.PluginCheckins[in.Provider] = in.On
+		if err := settings.Save(s); err != nil {
+			fail(rw, err)
+			return
+		}
+		writeJSON(rw, settingsState())
+	})
+	// and one account's daily check-in, whichever vendor's (#1902): off
+	// leaves it out while its vendor's is on
+	mux.HandleFunc("POST /api/settings/checkin-account", func(rw http.ResponseWriter, r *http.Request) {
+		var in struct {
+			Key string
+			On  bool
+		}
+		if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
+			fail(rw, err)
+			return
+		}
+		if in.Key == "" {
+			fail(rw, errors.New("no account"))
+			return
+		}
+		s := settings.Load()
+		off := slices.DeleteFunc(slices.Clone(s.CheckinOff), func(k string) bool { return k == in.Key })
+		if !in.On {
+			off = append(off, in.Key)
+		}
+		if len(off) == 0 {
+			off = nil
+		}
+		s.CheckinOff = off
 		if err := settings.Save(s); err != nil {
 			fail(rw, err)
 			return
@@ -2001,6 +2074,7 @@ func state() stateJSON {
 		aj := agentJSON{ID: a.ID, Name: a.Name, Icon: a.Icon, Path: tilde(a.Path), Fields: agentFields(a, vals)}
 		aj.Models = agentModelCount(a, aj.Fields)
 		aj.Menu = a.ListsModels
+		aj.NoNames = a.NoNames
 		aj.Drift = a.Drift()
 		aj.Wired = a.Wired()
 		if aj.Wired {
