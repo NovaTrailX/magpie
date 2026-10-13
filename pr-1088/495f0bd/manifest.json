@@ -1,0 +1,34 @@
+{
+  "summary": "在 Agent 页注册 OpenClaw：未安装时它会出现在「安装其他 Agent」列表里，带官方彩色图标和 shell/PowerShell、npm 两条安装命令；已接入时 Agent 详情面板多出「配置模型」，可用模型选择器设置主模型和可增删、可上下排序的降级模型序列并即时保存。",
+  "scenes": [
+    {
+      "title": "未安装时的 OpenClaw 安装入口",
+      "shots": [
+        {
+          "file": "01-openclaw-install-entry.png",
+          "caption": "展开后的安装列表：OpenClaw 的图标、Via 标签与安装命令",
+          "width": 2168
+        }
+      ]
+    },
+    {
+      "title": "Agent 列表里的 OpenClaw 行",
+      "shots": [
+        {
+          "file": "02-agents-rows-openclaw.png",
+          "caption": "展开后的 Agent 列表",
+          "width": 2168
+        }
+      ]
+    }
+  ],
+  "video": "preview.mp4",
+  "poster": "poster.png",
+  "errors": [],
+  "leak": false,
+  "skipped": null,
+  "mismatch": "",
+  "unseen": "沙盒里的 OpenClaw 未安装、也没有 ~/.openclaw 配置，因此 Agent 详情里的模型序列编辑器（「配置模型」的主模型/降级模型行、添加降级模型按钮、内联报错）以及只读配置和 $include 配置的错误文案都拿不到数据，无法显示；界面部分只展示它出现的位置——Agent 页。",
+  "interactive": true,
+  "pages": 1
+}

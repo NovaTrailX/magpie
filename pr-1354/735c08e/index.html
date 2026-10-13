@@ -1,0 +1,15 @@
+<!doctype html><html lang="zh"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>#1354 界面预览 · 735c08e</title>
+<style>:root{color-scheme:light dark;--bg:#f6f6f7;--fg:#1d1d1f;--muted:#6e6e73;--card:#fff;--line:#e5e5ea}
+@media (prefers-color-scheme:dark){:root{--bg:#111113;--fg:#f2f2f4;--muted:#9a9aa0;--card:#1c1c1f;--line:#2c2c30}}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 -apple-system,"Segoe UI","PingFang SC","Noto Sans CJK SC",sans-serif}
+main{max-width:1100px;margin:0 auto;padding:28px 16px 60px}h1{font-size:20px;margin:0 0 4px}.m{color:var(--muted);font-size:13px;margin:0 0 20px}
+video,img{display:block;width:100%;border-radius:10px;border:1px solid var(--line);background:var(--card)}figure{margin:0 0 28px}figcaption{color:var(--muted);font-size:13px;margin-top:8px}
+a{color:inherit}</style>
+<main><h1>#1354 界面预览</h1><p class="m">commit 735c08e · <a href="https://github.com/yetone/magpie/pull/1354">回到 PR</a> · 路由页的上下文窗口改成一条可点击的标题行，放在舞台与请求故事的下方：收起时只显示已用/窗口 token、占比、缓存与占用条，点开才构建详情网格和内容列表，不再有第二个标题；卡片宽到 800px 及以上时详情内的概览与内容并排成两栏。</p>
+<figure><video src="preview.mp4" controls autoplay muted playsinline poster="poster.png"></video><figcaption>红线是鼠标走过的轨迹，红色圆环是一次点击；底部文字是这一步在做什么。空格暂停，← → 逐段查看。</figcaption></figure>
+<figure><img src="01-routing-page.png" alt="路由页打开时的样子"><figcaption>路由页的上下文窗口头 · 路由页打开时的样子</figcaption></figure>
+<figure><img src="02-routing-context-collapsed.png" alt="页面下方收起的上下文窗口头：用量、占比与占用条"><figcaption>路由页的上下文窗口头 · 页面下方收起的上下文窗口头：用量、占比与占用条</figcaption></figure>
+<figure><img src="03-routing-context-expanded.png" alt="点击之后的上下文窗口"><figcaption>路由页的上下文窗口头 · 点击之后的上下文窗口</figcaption></figure>
+<figure><img src="04-routing-context-collapsed-again.png" alt="再次点击之后的上下文窗口"><figcaption>路由页的上下文窗口头 · 再次点击之后的上下文窗口</figcaption></figure>
+</main></html>

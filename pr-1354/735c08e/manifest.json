@@ -1,0 +1,39 @@
+{
+  "summary": "路由页的上下文窗口改成一条可点击的标题行，放在舞台与请求故事的下方：收起时只显示已用/窗口 token、占比、缓存与占用条，点开才构建详情网格和内容列表，不再有第二个标题；卡片宽到 800px 及以上时详情内的概览与内容并排成两栏。",
+  "scenes": [
+    {
+      "title": "路由页的上下文窗口头",
+      "shots": [
+        {
+          "file": "01-routing-page.png",
+          "caption": "路由页打开时的样子",
+          "width": 2560
+        },
+        {
+          "file": "02-routing-context-collapsed.png",
+          "caption": "页面下方收起的上下文窗口头：用量、占比与占用条",
+          "width": 2100
+        },
+        {
+          "file": "03-routing-context-expanded.png",
+          "caption": "点击之后的上下文窗口",
+          "width": 2100
+        },
+        {
+          "file": "04-routing-context-collapsed-again.png",
+          "caption": "再次点击之后的上下文窗口",
+          "width": 2100
+        }
+      ]
+    }
+  ],
+  "video": "preview.mp4",
+  "poster": "poster.png",
+  "errors": [],
+  "leak": false,
+  "skipped": null,
+  "mismatch": "",
+  "unseen": "沙盒窗口是 1280×800，路由卡片宽度不足 1100px，看不到宽卡片断点下「舞台与请求故事并排、两处列分隔线对齐」的布局；旧的 magpie.ctxShut 折叠偏好迁移、以及从用量页「上下文」入口临时展开某个请求而不改动已保存偏好的行为，也因沙盒里没有相应状态/操作路径而不在本片里展示。",
+  "interactive": true,
+  "pages": 1
+}
