@@ -78,7 +78,7 @@ const words = {
 };
 const keyWords = {
   en: { missing: "Proxy of Spare: type its address, like http://127.0.0.1:7890", hint: "Each key can go through a proxy of its own; Provider's proxy is the one above" },
-  zh: { missing: "Spare 的代理：请填写地址，例如 http://127.0.0.1:7890", hint: "每个 Key 可以走自己的代理；“供应商代理”即上面这一项" },
+  zh: { missing: "Spare 的代理：请填写地址，例如 http://127.0.0.1:7890", hint: "每个密钥都可以使用自己的代理；「供应商代理」即上方设置的代理" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {

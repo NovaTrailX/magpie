@@ -50,7 +50,7 @@ function serve(lang, posts) {
 
 const words = {
   en: { label: "Requests per minute", save: "Save", none: "No limit", bad: "Requests per minute: a whole number from 0 to 10000" },
-  zh: { label: "每分钟请求数", save: "保存", none: "不限制", bad: "每分钟请求数：0 到 10000 的整数" },
+  zh: { label: "每分钟请求数", save: "保存", none: "不限", bad: "每分钟请求数：0 到 10000 的整数" },
   ja: { label: "1 分間のリクエスト数", bad: "1 分間のリクエスト数：0〜10000 の整数" },
   de: { label: "Anfragen pro Minute", bad: "Anfragen pro Minute: eine ganze Zahl von 0 bis 10000" },
 };

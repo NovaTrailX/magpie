@@ -27,7 +27,7 @@ const groups = () => ({
 
 const words = {
   en: { edit: "Edit", save: "Save", label: "Slow to start", wait: "Wait", min: "1 min", tag: "Next after 60 s without a first token", waits: "Every member is waited for" },
-  zh: { edit: "编辑", save: "保存", label: "迟迟不出字", wait: "一直等", min: "1 分钟", tag: "60 秒 无首字换下一个", waits: "每个成员都会一直等" },
+  zh: { edit: "编辑", save: "保存", label: "迟迟不出字", wait: "持续等待", min: "1 分钟", tag: "60 秒 无首字换下一个", waits: "每个成员都会一直等" },
 };
 
 function serve(lang, posts) {

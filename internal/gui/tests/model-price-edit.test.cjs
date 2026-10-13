@@ -62,7 +62,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.route("**/*", serve(lang, posts));
       await page.goto("http://magpie.test/?view=providers");
       const zh = lang === "zh";
-      const L = { names: zh ? "名称与推理档位" : "Names & levels", price: zh ? "价格（$ / 百万 tokens）" : "Price, $ / 1M tokens", input: zh ? "输入" : "Input", output: zh ? "输出" : "Output",
+      const L = { names: zh ? "名称与推理档位" : "Names & levels", price: zh ? "价格（美元 / 百万 Token）" : "Price, $ / 1M tokens", input: zh ? "输入" : "Input", output: zh ? "输出" : "Output",
         unsaved: zh ? "未保存" : "unsaved", save: zh ? "保存" : "Save", reset: zh ? "恢复默认" : "Restore default", nolist: zh ? "model-3 没有官方价格：请填写输入和输出价格" : "model-3 has no list price: give its input and output prices" };
       await page.locator(".row.provider").click();
       if (!(await page.locator(".mnames:not([hidden])").count())) await page.getByRole("button", { name: L.names, exact: true }).click();
@@ -76,8 +76,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(await row("model-1").getByRole("textbox", { name: L.input, exact: true }).count(), 1);
       assert.equal(await row("model-1").locator("select").count(), 0);
       // whose list price it is: models.dev's, or the other magpie's
-      assert.match(await row("model-1").locator(".mprice").getAttribute("title"), zh ? /留空即官方价格/ : /empty: its list price/);
-      assert.match(await row("model-4").locator(".mprice").getAttribute("title"), zh ? /留空即另一台 magpie 计费用的价格/ : /empty: what the other magpie counts it at/);
+      assert.match(await row("model-1").locator(".mprice").getAttribute("title"), zh ? /留空则使用官方标价/ : /empty: its list price/);
+      assert.match(await row("model-4").locator(".mprice").getAttribute("title"), zh ? /留空则使用另一台 magpie 的计价/ : /empty: what the other magpie counts it at/);
 
       // a part typed, the others the list's; Restore default drops a price
       const y = await page.evaluate(() => scrollY);

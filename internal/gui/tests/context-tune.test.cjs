@@ -81,7 +81,7 @@ function serve(lang, posts) {
 const fewest = { en: "Fewest tokens", zh: "最省 Token", "zh-TW": "最省 Token", ja: "トークン最少", de: "Wenigste Tokens" };
 const caveat = {
   en: "A token estimate only: it doesn't measure how well the agent keeps the task after a compaction. The lower the window, the more often it compacts.",
-  zh: "只是 Token 估算：没有衡量压缩后 Agent 还能多好地接着做任务。阈值越低，压缩越频繁。",
+  zh: "这只是 Token 数量估算，未衡量压缩对 Agent 继续执行任务的影响。阈值越低，压缩越频繁。",
   "zh-TW": "只是 Token 估算：沒有衡量壓縮後 Agent 還能多好地接著做任務。閾值越低，壓縮越頻繁。",
   ja: "トークンの見積もりだけです。コンパクトのあとエージェントが作業をどれだけ保てるかは測っていません。しきい値が低いほどコンパクトの回数は増えます。",
   de: "Nur eine Token-Schätzung: Wie gut der Agent die Aufgabe nach einer Kompaktierung behält, misst sie nicht. Je niedriger die Schwelle, desto öfter wird kompaktiert.",

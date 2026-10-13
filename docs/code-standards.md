@@ -168,6 +168,7 @@ applies:
 ## GUI
 
 - Every string the user sees goes through `t()` and gets its translations in `i18n.js`. Tests run in Chinese and English.
+- 中文界面说明直接写操作、条件和结果，保留具体默认值、限制与技术名称。润色插值文案前检查调用处：占位符可能已包含单位或时间后缀，也可能代表时长而非次数；不要按变量名猜含义。
 - Use no native `<select>`. Dropdowns use the app's own menu (`openProtoMenu`).
 - A click never scrolls the page (`scrollOnPurpose`).
 - Don't use colored left-border stripes. Mark state with a dot or a swatch.

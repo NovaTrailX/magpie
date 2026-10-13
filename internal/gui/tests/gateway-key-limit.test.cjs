@@ -31,7 +31,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.route("**/*", fixture(lang, "light", events, { lan: true, limits: limits() }));
       const zh = lang === "zh";
       const w = zh
-        ? { limit: "为此密钥设置限额", change: "修改此密钥的限额", left: /剩余/, refused: /前拒绝请求/, tokens: "Token 限额", cost: "估算费用限额（美元）", window: "限额周期", cache: "缓存读取也计入", save: "保存", cancel: "取消", none: "不限制", unsaved: "未保存", week: "每周", bad: /Token 应为数量/ }
+        ? { limit: "为此密钥设置限额", change: "修改此密钥的限额", left: /剩余/, refused: /前拒绝请求/, tokens: "Token 限额", cost: "估算费用限额（美元）", window: "限额周期", cache: "缓存读取也计入", save: "保存", cancel: "取消", none: "不限", unsaved: "未保存", week: "每周", bad: /Token 应为数量/ }
         : { limit: "Set a limit for this key", change: "Change this key's limit", left: /tokens · .* left/, refused: /refused until/, tokens: "Token limit", cost: "Estimated cost limit, US$", window: "Limit window", cache: "Count cache reads too", save: "Save", cancel: "Cancel", none: "No limit", unsaved: "unsaved", week: "per week", bad: /Tokens is a count/ };
       await page.goto("http://magpie.test/?view=gateway");
       await page.locator("#gatewayKeys .acc[data-key]").last().waitFor();

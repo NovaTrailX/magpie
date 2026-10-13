@@ -78,7 +78,7 @@ const words = {
   },
   zh: {
     busy: "1/1 运行中 · 2 排队", one: "并发 1", two: "并发 2", three: "并发 3", four: "并发 4", seven: "并发 7", none: "并发不限",
-    menu: "同时请求数", def: "沿用提供商", other: "其他…", save: "保存", queue: "排队上限", wait: "排队等待",
+    menu: "同时请求数", def: "沿用供应商", other: "其他…", save: "保存", queue: "排队上限", wait: "排队等待",
     badQueue: "排队上限：0 到 10000 的整数",
   },
 };

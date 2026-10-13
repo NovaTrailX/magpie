@@ -50,7 +50,7 @@ function server(lang, posted) {
 
 const L = {
   en: { ws: "Workspace ID", ep: "System One endpoint", sg: "Workspace · Singapore", tp: "Token Plan · Beijing", add: "Add", needed: "Give the workspace ID your API key belongs to, or pick the Token Plan", custom: "Custom provider", detect: "Detect APIs", use: "Use these" },
-  zh: { ws: "业务空间 ID", ep: "System One 端点", sg: "业务空间 · 新加坡", tp: "Token Plan · 北京", add: "添加", needed: "请填写 API Key 所属的业务空间 ID，或选择 Token Plan", custom: "自定义供应商", detect: "检测协议", use: null },
+  zh: { ws: "业务空间 ID", ep: "System One 端点", sg: "业务空间 · 新加坡", tp: "Token Plan · 北京", add: "添加", needed: "请填写 API 密钥所属的业务空间 ID，或选择 Token Plan", custom: "自定义供应商", detect: "检测协议", use: null },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {

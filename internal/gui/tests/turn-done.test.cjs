@@ -50,7 +50,7 @@ const words = {
   en: { name: "Task done alert", off: "Off", m: (n) => `${n} min`, s: (n) => `${n} s`, cny: "¥ CNY",
     sub: "A notification when Claude Code, Codex, OpenCode or another agent going through magpie finishes a task that ran at least this long" },
   zh: { name: "任务完成提醒", off: "关闭", m: (n) => `${n} 分钟`, s: (n) => `${n} 秒`, cny: "¥ 人民币",
-    sub: "Claude Code、Codex、OpenCode 等经由 magpie 的智能体完成一个至少跑了这么久的任务时通知" },
+    sub: "经 magpie 运行的 Claude Code、Codex、OpenCode 或其他 Agent 完成任务后，如果任务运行时间达到此处设定的时长，就发送通知" },
   "zh-TW": { name: "任務完成提醒", off: "關閉", m: (n) => `${n} 分鐘`, s: (n) => `${n} 秒`,
     sub: "Claude Code、Codex、OpenCode 等經由 magpie 的智慧體完成一個至少跑了這麼久的任務時通知" },
   ja: { name: "タスク完了通知", off: "オフ", m: (n) => `${n} 分`, s: (n) => `${n} 秒`,

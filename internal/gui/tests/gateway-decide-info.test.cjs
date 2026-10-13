@@ -64,7 +64,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const box = rowOf(page, id).locator(".minfo");
         return { chips: (await box.locator(".badge").allTextContents()).map((s) => s.trim()), img: await box.locator(".mi-img").count(), tip: await box.getAttribute("title") };
       };
-      const said = lang === "zh" ? "决策模型：路由组会问它，agent 看不到它" : "Decision model: routing groups ask it, agents never see it";
+      const said = lang === "zh" ? "决策模型：路由组会调用它，Agent 不会看到它" : "Decision model: routing groups ask it, agents never see it";
       let i = await info("workers/@cf/cloudflare/clef");
       assert.equal(i.img, 1, "Clef takes images");
       assert.deepEqual(i.chips, ["", "66K"]);

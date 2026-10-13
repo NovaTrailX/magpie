@@ -61,7 +61,7 @@ function serve(lang) {
 
 const want = {
   en: { said: "It said: " + vendor, hint, why: "the vendor turns away Codex's system prompt whichever account it goes to", level: "low reasoning" },
-  zh: { said: "原话：" + vendor, hint: "WorkBuddy 会因系统提示词拒绝 Codex 和 Claude Code 的对话；请在 Hermes、OpenCode 或 Pi 中使用，或在此分组中再加一个供应商", why: "服务商不接受 Codex 的系统提示词，换哪个账号都一样", level: "low 推理" },
+  zh: { said: "原话：" + vendor, hint: "WorkBuddy 会因系统提示词拒绝 Codex 和 Claude Code 的对话；请改用 Hermes、OpenCode 或 Pi，或在此路由组中添加其他供应商。", why: "无论使用哪个账号，供应商都会拒绝 Codex 的系统提示词", level: "low 推理" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {

@@ -306,7 +306,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(await row.locator(".searcher-own, .searcher-unused, .searcher-relays, .searcher-left-out").count(), 0);
       assert.equal(await page.locator("#searchFirstRow").count(), 0);
       assert.equal(await row.locator(".sub").innerText(), lang === "zh"
-        ? "关闭供应商代搜后，仅使用已配置的搜索 API；未配置时，Magpie 不添加搜索工具。供应商自带的联网搜索不受影响。"
+        ? "关闭供应商代搜后，仅使用已配置的搜索 API；如果没有配置搜索 API，magpie 不会添加搜索工具。供应商自带的联网搜索不受影响。"
         : "When provider search is off, only configured Search APIs are used. Without a Search API, magpie does not add a search tool. Providers' native web search is unchanged.");
 
       // back to Automatic

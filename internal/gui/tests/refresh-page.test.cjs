@@ -23,7 +23,7 @@ const words = {
     nav: { usage: "Usage", providers: "Providers" },
   },
   zh: {
-    agents: "重新检测本机的 Agent：刚安装或卸载的，或在别处改过配置的",
+    agents: "重新检测本机 Agent 的安装、卸载和配置变化",
     usage: "立即重新读取用量",
     models: "刷新模型列表（models.dev 与各供应商）",
     nav: { usage: "用量", providers: "供应商" },

@@ -91,7 +91,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
     for (const [lang, head, name, ask, take] of [
       ["en", "Agents' sign-ins", "Subscription accounts", "Turn off subscription accounts?", "Turn them off"],
-      ["zh", "智能体登录", "订阅账号", "关闭订阅账号？", "关闭"],
+      ["zh", "Agent 登录信息", "订阅账号", "关闭订阅账号？", "关闭"],
       ["zh-TW", "智慧體登入", "訂閱帳號", "關閉訂閱帳號？", "關閉"],
       ["ja", "エージェントのサインイン", "サブスクリプションアカウント", "サブスクリプションアカウントをオフにしますか？", "オフにする"],
       ["de", "Anmeldungen der Agenten", "Abo-Konten", "Abo-Konten ausschalten?", "Ausschalten"],

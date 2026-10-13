@@ -92,7 +92,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // off, nothing changed by anything: the description of the whole lot
       assert.equal(await first.locator(".name").textContent(), zh ? "WebDAV / S3 同步" : "WebDAV or S3 sync");
       assert.equal(await first.locator(".sub").textContent(), zh
-        ? "让每台电脑上的供应商（含 API Key）、设置、Profile、agent 的模型、资源库保持一致"
+        ? "让每台电脑上的供应商（含 API 密钥）、设置、方案、Agent 的模型、资源库保持一致"
         : "Keeps providers with their API keys, settings, profiles, agents' models, library the same on every computer");
 
       // an open form is someone typing: a focus while one is open must not
@@ -124,7 +124,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await first.locator(".val button", { hasText: zh ? "编辑" : "Edit" }).click();
       await form.waitFor({ state: "visible" });
       const tick = (word) => form.locator("label.tick", { hasText: word }).locator("input");
-      assert.equal(await tick("API Key").isChecked(), true);
+      assert.equal(await tick(zh ? "API 密钥" : "API Key").isChecked(), true);
       assert.equal(await tick(zh ? "agent" : "Agents").isChecked(), false, "agents' models must be unticked, as the CLI left it");
       assert.equal(await tick(zh ? "资源库" : "Library").isChecked(), false, "the library must be unticked, as the CLI left it");
       await first.locator(".val button", { hasText: zh ? "关闭" : "Close" }).click();
@@ -143,7 +143,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       sync.value = { on: false, keys: false, agents: false, library: true };
       await focus();
       assert.equal(await settle(async () => (await first.locator(".sub").textContent()) === (zh
-        ? "让每台电脑上的供应商（不含 API Key）、设置、Profile、资源库保持一致"
+        ? "让每台电脑上的供应商（不含 API 密钥）、设置、方案、资源库保持一致"
         : "Keeps providers without their API keys, settings, profiles, library the same on every computer")), true,
         "the description must be built from the view's toggles");
       assert.equal(await first.locator(".name").textContent(), zh ? "WebDAV / S3 同步" : "WebDAV or S3 sync");
@@ -153,7 +153,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       sync.value = { on: false };
       await focus();
       assert.equal(await settle(async () => (await first.locator(".sub").textContent()) === (zh
-        ? "让每台电脑上的供应商（含 API Key）、设置、Profile、agent 的模型、资源库保持一致"
+        ? "让每台电脑上的供应商（含 API 密钥）、设置、方案、Agent 的模型、资源库保持一致"
         : "Keeps providers with their API keys, settings, profiles, agents' models, library the same on every computer")), true,
         "a view with no toggles must read as the defaults");
 

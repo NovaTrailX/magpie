@@ -53,7 +53,7 @@ function serve(lang) {
 const words = {
   en: { pace: /until one of its Codex resets about to run out is used by itself/, smart: /one of its Codex resets about to run out is used by itself in/,
     paceWeek: /per hour until reset/, smartWeek: /its allowance renews soonest/ },
-  zh: { pace: /距自动使用快到期 Codex 重置卡的小时数最高/, smart: /将自动使用其快到期的 Codex 重置卡/,
+  zh: { pace: /距使用重置卡的小时数」最高.*后自动使用即将过期的 Codex 重置卡/, smart: /将自动使用其快到期的 Codex 重置卡/,
     paceWeek: /÷ 距重置小时数最高/, smartWeek: /它的额度最先重置/ },
 };
 
